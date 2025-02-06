@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Asistentes</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f4f7fc; 
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        header h1 { 
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+        }
+
+        nav { 
+            display: flex; 
+            gap: 0.8rem; 
+        }
+
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            padding: 0.5rem 1rem; 
+            border-radius: 5px; 
+            transition: background-color 0.3s ease-in-out;
+            white-space: nowrap;
+        }
+
+        nav a:hover { 
+            background-color: #0056b3; 
+        }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 1rem auto;
+            background-color: white; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+            padding: 1rem;
+            width: 95%;
+            flex: 1;
+        }
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 1.25rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: bold;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        input, select { 
+            width: 100%;
+            padding: 0.75rem; 
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            border-radius: 5px; 
+            border: 1px solid #ccc;
+        }
+
+        button { 
+            padding: 0.75rem 1.25rem;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            border-radius: 5px; 
+            border: none; 
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-enviar { background-color: #007bff; color: white; }
+        .btn-editar { background-color: #ffc107; color: white; }
+        .btn-eliminar { background-color: #dc3545; color: white; }
+
+        .btn-enviar:hover { background-color: #0056b3; }
+        .btn-editar:hover { background-color: #e0a800; }
+        .btn-eliminar:hover { background-color: #c82333; }
+
+        .table-container { 
+            margin-top: 1.25rem;
+            overflow-x: auto;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 1.25rem;
+        }
+
+        th, td { 
+            padding: 0.75rem; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+        }
+
+        th { 
+            background-color: #007bff; 
+            color: white;
+        }
+
+        .acciones-container {
+            display: flex;
+            gap: 0.625rem;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        @media (max-width: 640px) {
+            .acciones-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .acciones-container button {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+
+        footer { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 1rem; 
+            text-align: center; 
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            margin-top: auto;
+        }
+
+        footer a { 
+            color: white; 
+            text-decoration: none; 
+        }
+
+        /* Estilos específicos para DataTables */
+        .dataTables_wrapper .dataTables_filter input {
+            max-width: 150px;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            max-width: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .dataTables_wrapper .dataTables_filter,
+            .dataTables_wrapper .dataTables_length {
+                text-align: left;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Sistema de Notificaciones</h1>
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="asistentes.html">Asistentes</a>
+        <a href="eventos.html">Eventos</a>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn" style="background-color: red; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease;">Cerrar sesión</button>
+        </form>
+        
+        
+    </nav>
+</header>
+
+<div class="container">
+    <h1>Gestión de Asistentes</h1>
+    <form id="asistente-form">
+        <input type="hidden" id="asistente-id">
+        <div class="form-group">
+            <label>Nombres Completos:</label>
+            <input type="text" id="nombre" required>
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="acciones-container">
+            <button type="submit" class="btn-enviar"><i class="fas fa-save"></i> Guardar</button>
+            <button type="button" class="btn-eliminar" onclick="cancelarEdicion()"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    </form>
+
+    <div class="form-group">
+        <label for="archivoTxt">📂 Selecciona un archivo TXT con nombres y correos:</label>
+        <label class="file-label">
+            <i class="fas fa-upload"></i> Elegir Archivo
+            <input type="file" id="archivoTxt" accept=".txt" onchange="mostrarNombreArchivo()">
+        </label>
+        <p id="file-name">Ningún archivo seleccionado</p>
+        <button onclick="importarAsistentes()" class="btn-importar"><i class="fas fa-file-import"></i> Importar</button>
+    </div>
+
+
+    <div class="table-container">
+        <table id="asistentes-table" class="display">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+        
+    </div>
+
+    <div class="acciones-container">
+        <button class="btn-enviar" onclick="descargarPDF()"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+        <button class="btn-enviar" onclick="descargarExcel()"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Sistema de Notificaciones | Desarrollado por <strong>Edwin Danilo Oto Toapanta</strong></p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script>
+    // Variables globales
+    let table;
+    
+    
+
+
+
+
+
+    // Función para cargar asistentes
+    function cargarAsistentes() {
+        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        table.clear();
+        asistentes.forEach((asistente, index) => {
+            table.row.add([
+                asistente.nombre,
+                asistente.email,
+                `<div class="acciones-container">
+                    <button class="btn-editar" onclick="editarAsistente(${index})"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarAsistente(${index})"><i class="fas fa-trash"></i> Eliminar</button>
+                </div>`
+            ]);
+        });
+        table.draw();
+    }
+
+    // Función para eliminar asistente
+    function eliminarAsistente(index) {
+        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        asistentes.splice(index, 1);
+        localStorage.setItem('asistentes', JSON.stringify(asistentes));
+        cargarAsistentes();
+        iziToast.success({
+            title: '¡Éxito!',
+            message: 'Asistente eliminado correctamente.',
+            position: 'topRight'
+        });
+    }
+
+    // Función para editar asistente
+    function editarAsistente(index) {
+        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        const asistente = asistentes[index];
+        $('#nombre').val(asistente.nombre);
+        $('#email').val(asistente.email);
+        $('#asistente-id').val(index);
+    }
+
+    // Función para cancelar edición
+    function cancelarEdicion() {
+        $('#asistente-form')[0].reset();
+        $('#asistente-id').val('');
+    }
+
+    // Función para descargar PDF
+    function descargarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        let y = 10;
+        doc.text("Lista de Asistentes", 14, y);
+        y += 10;
+        asistentes.forEach(asistente => {
+            doc.text(`${asistente.nombre} - ${asistente.email}`, 14, y);
+            y += 10;
+        });
+        doc.save('asistentes.pdf');
+    }
+
+    // Función para descargar Excel
+    function descargarExcel() {
+        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        const ws = XLSX.utils.json_to_sheet(asistentes);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Asistentes');
+        XLSX.writeFile(wb, 'asistentes.xlsx');
+    }
+
+
+
+    function importarAsistentes() {
+        const archivo = document.getElementById("archivoTxt").files[0];
+        if (!archivo) {
+            iziToast.error({ title: 'Error', message: 'Selecciona un archivo TXT' });
+            return;
+        }
+    
+        const lector = new FileReader();
+        lector.onload = function(event) {
+            const contenido = event.target.result.trim(); // Elimina espacios en blanco extras
+            const lineas = contenido.split("\n").map(linea => linea.trim());
+            let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            let nuevosAsistentes = [];
+    
+            lineas.forEach(linea => {
+                const datos = linea.split(",").map(d => d.trim());
+                if (datos.length === 2) {
+                    const [nombre, email] = datos;
+                    if (nombre && email && validarEmail(email)) {
+                        nuevosAsistentes.push({ nombre, email });
+                    }
+                }
+            });
+    
+            if (nuevosAsistentes.length > 0) {
+                asistentes = [...asistentes, ...nuevosAsistentes];
+                localStorage.setItem('asistentes', JSON.stringify(asistentes));
+                cargarAsistentes();
+                iziToast.success({ title: 'Éxito', message: 'Archivo importado correctamente' });
+            } else {
+                iziToast.warning({ title: 'Aviso', message: 'No se encontraron datos válidos en el archivo' });
+            }
+        };
+    
+        lector.readAsText(archivo);
+    }
+    
+    function validarEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+    
+
+
+
+
+
+    
+
+
+
+
+
+
+    // Inicialización cuando el documento está listo
+    $(document).ready(function() {
+        // Inicializar DataTable con opciones responsive
+        table = $('#asistentes-table').DataTable({
+            responsive: true,
+            "language": {
+                "sProcessing": "Procesando...",
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sZeroRecords": "No se encontraron resultados",
+                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "sSearch": "Buscar:",
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sPrevious": "Anterior",
+                    "sNext": "Siguiente",
+                    "sLast": "Último"
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+        // Cargar asistentes iniciales
+        cargarAsistentes();
+
+        // Manejar envío del formulario
+        $('#asistente-form').submit(function(event) {
+            event.preventDefault();
+            const nombre = $('#nombre').val();
+            const email = $('#email').val();
+            const asistenteId = $('#asistente-id').val();
+            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+
+            if (asistenteId !== '') {
+                asistentes[asistenteId] = { nombre, email };
+            } else {
+                asistentes.push({ nombre, email });
+            }
+
+            localStorage.setItem('asistentes', JSON.stringify(asistentes));
+            iziToast.success({
+                title: '¡Éxito!',
+                message: 'Asistente guardado correctamente.',
+                position: 'topRight'
+            });
+            cargarAsistentes();
+            $('#asistente-form')[0].reset();
+            $('#asistente-id').val('');
+        });
+
+
+
+
+
+    });
+</script>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Notificaciones</title>
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        nav a:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            background-color: #28a745;
+            color: white;
+        }
+
+        button.cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+
+        .actions-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-enviar,
+        .btn-editar,
+        .btn-eliminar,
+        .btn-exportar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-enviar {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-editar {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-eliminar {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-exportar {
+            background-color: #28a745;
+            color: white;
+            margin: 5px;
+        }
+
+        .btn-enviar:hover {
+            background-color: #218838;
+        }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #c82333;
+        }
+
+        .btn-exportar:hover {
+            background-color: #218838;
+        }
+
+        .btn-enviar i,
+        .btn-editar i,
+        .btn-eliminar i {
+            font-size: 14px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+        }
+
+        footer {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Sistema de Notificaciones</h1>
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="asistentes.html">Asistentes</a>
+            <a href="eventos.html">Eventos</a>
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-btn" style="background-color: red; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease;">Cerrar sesión</button>
+            </form>
+            
+            
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Gestión de Eventos</h1>
+        <form id="evento-form">
+            <input type="hidden" id="evento-id">
+            <div class="form-group">
+                <label for="evento-nombre">Nombre del Evento:</label>
+                <input type="text" id="evento-nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="evento-fecha">Fecha:</label>
+                <input type="date" id="evento-fecha" required>
+            </div>
+            <div class="form-group">
+                <label for="asistentes-select">Seleccionar Asistentes:</label>
+                <button type="button" onclick="seleccionarTodos()" class="btn btn-primary">Seleccionar Todo</button>
+                <div id="asistentes-checkbox" class="checkbox-container"></div>
+            </div>
+            
+            <script>
+                function seleccionarTodos() {
+                    let checkboxes = document.querySelectorAll("#asistentes-checkbox input[type='checkbox']");
+                    let boton = document.querySelector("button[onclick='seleccionarTodos()']");
+                    let seleccionarTodo = boton.dataset.seleccionado === "true";
+                    
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = !seleccionarTodo;
+                    });
+            
+                    boton.dataset.seleccionado = !seleccionarTodo;
+                    boton.textContent = seleccionarTodo ? "Seleccionar Todo" : "Deseleccionar Todo";
+                }
+            </script>
+            
+            <button type="submit" id="btn-submit">Crear Evento</button>
+            <button type="button" class="cancel" onclick="cancelarEvento()">Cancelar</button>
+        </form>
+
+        <div class="table-container">
+            <table id="tabla-eventos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Fecha</th>
+                        <th>Asistentes</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="eventos-lista"></tbody>
+            </table>
+        </div>
+        <button class="btn-exportar" onclick="exportarPDF()">Exportar a PDF</button>
+        <button class="btn-exportar" onclick="exportarExcel()">Exportar a Excel</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Sistema de Notificaciones | Desarrollado por <strong>Edwin Danilo Oto Toapanta</strong></p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        let eventoEnEdicion = null;
+        let dataTable = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            cargarAsistentes();
+            cargarEventos();
+
+            document.getElementById('evento-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                guardarEvento();
+            });
+        });
+
+        function cargarAsistentes() {
+            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            const container = document.getElementById('asistentes-checkbox');
+            container.innerHTML = '';
+            asistentes.forEach(asistente => {
+                const label = document.createElement('label');
+                label.innerHTML = `
+                    <input type="checkbox" value="${asistente.email}">
+                    ${asistente.nombre}
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        function cargarEventos() {
+            if (dataTable) {
+                dataTable.destroy();
+            }
+
+            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            const listaEventos = document.getElementById('eventos-lista');
+            listaEventos.innerHTML = '';
+            
+            eventos.forEach((evento, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${evento.nombre}</td>
+                    <td>${evento.fecha}</td>
+                    <td>${evento.asistentes.join(', ')}</td>
+                    <td>
+                        <div class="actions-container">
+                            <button class="btn-enviar" onclick="enviarCorreo('${evento.asistentes.join(', ')}', '${evento.nombre}', '${evento.fecha}')">
+                                <i class="fas fa-paper-plane"></i> Enviar
+                            </button>
+                            <button class="btn-editar" onclick="editarEvento(${index})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-eliminar" onclick="eliminarEvento(${index})">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </td>`;
+                listaEventos.appendChild(tr);
+            });
+
+            dataTable = $('#tabla-eventos').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json'
+                }
+            });
+        }
+
+        function guardarEvento() {
+            const nombre = document.getElementById('evento-nombre').value;
+            const fecha = document.getElementById('evento-fecha').value;
+            const asistentes = Array.from(document.querySelectorAll('#asistentes-checkbox input:checked')).map(checkbox => checkbox.value);
+
+            if (nombre && fecha && asistentes.length > 0) {
+                let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+                const nuevoEvento = { nombre, fecha, asistentes };
+
+                if (eventoEnEdicion !== null) {
+                    eventos[eventoEnEdicion] = nuevoEvento;
+                    eventoEnEdicion = null;
+                    document.getElementById('btn-submit').textContent = 'Crear Evento';
+                } else {
+                    eventos.push(nuevoEvento);
+                }
+
+                localStorage.setItem('eventos', JSON.stringify(eventos));
+                cargarEventos();
+                document.getElementById('evento-form').reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    text: eventoEnEdicion !== null ? 'Evento actualizado exitosamente.' : 'Evento creado exitosamente.'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor complete todos los campos.'
+                });
+            }
+        }
+
+        function editarEvento(index) {
+            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            const evento = eventos[index];
+            
+            document.getElementById('evento-nombre').value = evento.nombre;
+            document.getElementById('evento-fecha').value = evento.fecha;
+            
+            const checkboxes = document.querySelectorAll('#asistentes-checkbox input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = evento.asistentes.includes(checkbox.value);
+            });
+
+            eventoEnEdicion = index;
+            document.getElementById('btn-submit').textContent = 'Actualizar Evento';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function eliminarEvento(index) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esta acción",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+                    eventos.splice(index, 1);
+                    localStorage.setItem('eventos', JSON.stringify(eventos));
+                    cargarEventos();
+                    Swal.fire('Eliminado', 'El evento ha sido eliminado.', 'success');
+                }
+            });
+        }
+
+        function cancelarEvento() {
+            document.getElementById('evento-form').reset();
+            eventoEnEdicion = null;
+            document.getElementById('btn-submit').textContent = 'Crear Evento';
+        }
+
+        function enviarCorreo(asistentes, nombreEvento, fechaEvento) {
+            const emailsArray = asistentes.split(', ');
+            emailsArray.forEach(email => {
+                $.ajax({
+                    url: '/enviar-correo',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ email, evento: nombreEvento, fecha: fechaEvento }),
+                    success(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: `Correo enviado a ${email}`
+                        });
+                    },
+                    error(error) {
+                        console.error(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: `Error al enviar correo a ${email}`
+                        });
+                    }
+                });
+            });
+        }
+
+        
+        function exportarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            let y = 10;
+            doc.setFont('Arial', 'normal');
+            doc.setFontSize(12);
+            doc.text('Eventos:', 10, y);
+            y += 10;
+            eventos.forEach(evento => {
+                doc.text(`Evento: ${evento.nombre}, Fecha: ${evento.fecha}`, 10, y);
+                y += 10;
+            });
+            doc.save('eventos.pdf');
+        }
+
+        function exportarExcel() {
+            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            const ws = XLSX.utils.json_to_sheet(eventos);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Eventos');
+            XLSX.writeFile(wb, 'eventos.xlsx');
+        }
+    </script>
+</body>
+
+</html>
