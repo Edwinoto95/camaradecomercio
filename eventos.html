@@ -5,11 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notificaciones</title>
-    
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
     <style>
@@ -228,6 +227,55 @@
             color: white;
             text-decoration: none;
         }
+
+        /* Estilos para la ventana modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 70vh;
+            /* Altura máxima para evitar que la ventana modal sea demasiado grande */
+            overflow-y: auto;
+            /* Agrega scroll si el contenido excede la altura máxima */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Estilos para la búsqueda */
+        #search-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -239,13 +287,12 @@
             <a href="asistentes.html">Socios</a>
             <a href="eventos.html">Eventos</a>
             <form action="/logout" method="POST">
-                <button type="submit" class="logout-btn" style="background-color: red; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease;">Cerrar sesión</button>
+                <button type="submit" class="logout-btn"
+                    style="background-color: red; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease;">Cerrar
+                    sesión</button>
             </form>
-            
-            
         </nav>
     </header>
-
     <div class="container">
         <h1>Gestión de Eventos</h1>
         <form id="evento-form">
@@ -260,30 +307,16 @@
             </div>
             <div class="form-group">
                 <label for="asistentes-select">Seleccionar Socios:</label>
-                <button type="button" onclick="seleccionarTodos()" class="btn btn-primary">Seleccionar Todo</button>
-                <div id="asistentes-checkbox" class="checkbox-container"></div>
+                <button type="button" onclick="abrirModalAsistentes()" class="btn btn-primary">Seleccionar
+                    Socios</button>
+                <div id="asistentes-seleccionados">
+                    <!-- Aquí se mostrarán los socios seleccionados -->
+                </div>
             </div>
-            
-            <script>
-                function seleccionarTodos() {
-                    let checkboxes = document.querySelectorAll("#asistentes-checkbox input[type='checkbox']");
-                    let boton = document.querySelector("button[onclick='seleccionarTodos()']");
-                    let seleccionarTodo = boton.dataset.seleccionado === "true";
-                    
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = !seleccionarTodo;
-                    });
-            
-                    boton.dataset.seleccionado = !seleccionarTodo;
-                    boton.textContent = seleccionarTodo ? "Seleccionar Todo" : "Deseleccionar Todo";
-                }
-            </script>
-            
             <button type="submit" id="btn-submit">Crear Evento</button>
             <button type="button" class="cancel" onclick="cancelarEvento()">Cancelar</button>
         </form>
         <h1>Gestión de envio de mensajes</h1>
-
         <div class="table-container">
             <table id="tabla-eventos">
                 <thead>
@@ -300,16 +333,30 @@
         <button class="btn-exportar" onclick="exportarPDF()">Exportar a PDF</button>
         <button class="btn-exportar" onclick="exportarExcel()">Exportar a Excel</button>
     </div>
-
+    <!-- The Modal -->
+    <div id="modalAsistentes" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalAsistentes()">&times;</span>
+            <h2>Seleccionar Socios</h2>
+            <input type="text" id="search-input" placeholder="Buscar socio por nombre o correo">
+            <button type="button" id="select-all-btn" onclick="seleccionarTodosLosAsistentes()">Seleccionar
+                Todos</button>
+            <div id="asistentes-checkbox" class="checkbox-container">
+                <!-- Aquí se generarán los checkboxes de los socios -->
+            </div>
+            <button type="button" onclick="guardarAsistentesSeleccionados()">Guardar Seleccionados</button>
+        </div>
+    </div>
     <footer>
         <p>&copy; 2025 Sistema de Notificaciones | Desarrollado por <strong>Edwin Danilo Oto Toapanta</strong></p>
     </footer>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         let eventoEnEdicion = null;
         let dataTable = null;
+        let asistentesSeleccionados = []; // Array para guardar los asistentes seleccionados
 
         document.addEventListener('DOMContentLoaded', function () {
             cargarAsistentes();
@@ -320,7 +367,15 @@
                 guardarEvento();
             });
         });
-
+        // Función para abrir el modal de asistentes
+        function abrirModalAsistentes() {
+            document.getElementById('modalAsistentes').style.display = 'block';
+        }
+        // Función para cerrar el modal de asistentes
+        function cerrarModalAsistentes() {
+            document.getElementById('modalAsistentes').style.display = 'none';
+        }
+        // Función para cargar los asistentes en el modal
         function cargarAsistentes() {
             const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
             const container = document.getElementById('asistentes-checkbox');
@@ -328,128 +383,200 @@
             asistentes.forEach(asistente => {
                 const label = document.createElement('label');
                 label.innerHTML = `
-                    <input type="checkbox" value="${asistente.email}">
+                    <input type="checkbox" value="${asistente.email}" data-nombre="${asistente.nombre}" onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
                     ${asistente.nombre}
                 `;
                 container.appendChild(label);
             });
+            // Agrega el evento de escucha para la búsqueda
+            document.getElementById('search-input').addEventListener('input', buscarAsistentes);
         }
-
-        function cargarEventos() {
-            if (dataTable) {
-                dataTable.destroy();
+        // Función para buscar asistentes
+        function buscarAsistentes() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            const container = document.getElementById('asistentes-checkbox');
+            container.innerHTML = '';
+            asistentes.forEach(asistente => {
+                if (asistente.nombre.toLowerCase().includes(searchTerm) || asistente.email.toLowerCase().includes(searchTerm)) {
+                    const label = document.createElement('label');
+                    label.innerHTML = `
+                        <input type="checkbox" value="${asistente.email}" data-nombre="${asistente.nombre}" onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
+                        ${asistente.nombre}
+                    `;
+                    container.appendChild(label);
+                }
+            });
+        }
+        // Función para seleccionar o deseleccionar todos los asistentes
+        function seleccionarTodosLosAsistentes() {
+            const checkboxes = document.querySelectorAll('#asistentes-checkbox input[type="checkbox"]');
+            const todosSeleccionados = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !todosSeleccionados;
+                const email = checkbox.value;
+                if (!todosSeleccionados) {
+                    // If we are selecting all, add the email if it's not already there
+                    if (!asistentesSeleccionados.includes(email)) {
+                        asistentesSeleccionados.push(email);
+                    }
+                } else {
+                    // If we are deselecting all, remove the email if it's there
+                    asistentesSeleccionados = asistentesSeleccionados.filter(e => e !== email);
+                }
+            });
+        }
+        function actualizarAsistentesSeleccionados(email) {
+            const checkbox = document.querySelector(`#asistentes-checkbox input[value="${email}"]`);
+            if (checkbox.checked) {
+                if (!asistentesSeleccionados.includes(email)) {
+                    asistentesSeleccionados.push(email);
+                }
+            } else {
+                asistentesSeleccionados = asistentesSeleccionados.filter(e => e !== email);
             }
-
-            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+        }
+        // Función para guardar los asistentes seleccionados
+        function guardarAsistentesSeleccionados() {
+            // Aquí puedes guardar los asistentes seleccionados en tu evento
+            console.log('Asistentes seleccionados:', asistentesSeleccionados);
+            // Cierra el modal después de guardar
+            cerrarModalAsistentes();
+            // Actualiza la vista de asistentes seleccionados en el formulario principal (opcional)
+            actualizarVistaAsistentesSeleccionados();
+        }
+        // Función para actualizar la vista de asistentes seleccionados en el formulario principal
+        function actualizarVistaAsistentesSeleccionados() {
+            const container = document.getElementById('asistentes-seleccionados');
+            container.innerHTML = '';
+            asistentesSeleccionados.forEach(email => {
+                const asistente = JSON.parse(localStorage.getItem('asistentes')).find(a => a.email === email);
+                if (asistente) {
+                    const span = document.createElement('span');
+                    span.textContent = asistente.nombre + '; ';
+                    container.appendChild(span);
+                }
+            });
+        }
+        // Function to load events from local storage
+        function cargarEventos() {
+            let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
             const listaEventos = document.getElementById('eventos-lista');
-            listaEventos.innerHTML = '';
-            
-            eventos.forEach((evento, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            listaEventos.innerHTML = ''; // Clear existing list
+
+            eventos.forEach(evento => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
                     <td>${evento.nombre}</td>
                     <td>${evento.fecha}</td>
-                    <td>${evento.asistentes.join(', ')}</td>
+                    <td>${evento.asistentes.length}</td>
                     <td>
                         <div class="actions-container">
                             <button class="btn-enviar" onclick="enviarCorreo('${evento.asistentes.join(', ')}', '${evento.nombre}', '${evento.fecha}')">
                                 <i class="fas fa-paper-plane"></i> Enviar
                             </button>
-                            <button class="btn-editar" onclick="editarEvento(${index})">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn-eliminar" onclick="eliminarEvento(${index})">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
+                            <button class="btn-editar" onclick="editarEvento('${evento.id}')"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn-eliminar" onclick="eliminarEvento('${evento.id}')"><i class="fas fa-trash"></i> Eliminar</button>
                         </div>
-                    </td>`;
-                listaEventos.appendChild(tr);
-            });
-
-            dataTable = $('#tabla-eventos').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json'
-                }
+                    </td>
+                `;
+                listaEventos.appendChild(row);
             });
         }
-
+        // Function to save an event
         function guardarEvento() {
             const nombre = document.getElementById('evento-nombre').value;
             const fecha = document.getElementById('evento-fecha').value;
-            const asistentes = Array.from(document.querySelectorAll('#asistentes-checkbox input:checked')).map(checkbox => checkbox.value);
-
-            if (nombre && fecha && asistentes.length > 0) {
-                let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
-                const nuevoEvento = { nombre, fecha, asistentes };
-
-                if (eventoEnEdicion !== null) {
-                    eventos[eventoEnEdicion] = nuevoEvento;
-                    eventoEnEdicion = null;
-                    document.getElementById('btn-submit').textContent = 'Crear Evento';
-                } else {
-                    eventos.push(nuevoEvento);
+            if (!nombre || !fecha) {
+                Swal.fire('Error', 'Por favor, complete todos los campos.', 'error');
+                return;
+            }
+            if (asistentesSeleccionados.length === 0) {
+                Swal.fire('Error', 'Por favor, seleccione al menos un socio.', 'error');
+                return;
+            }
+            let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            if (eventoEnEdicion) {
+                // Editing existing event
+                eventoEnEdicion.nombre = nombre;
+                eventoEnEdicion.fecha = fecha;
+                eventoEnEdicion.asistentes = asistentesSeleccionados;
+                const index = eventos.findIndex(evento => evento.id === eventoEnEdicion.id);
+                if (index !== -1) {
+                    eventos[index] = eventoEnEdicion;
                 }
-
-                localStorage.setItem('eventos', JSON.stringify(eventos));
-                cargarEventos();
-                document.getElementById('evento-form').reset();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito',
-                    text: eventoEnEdicion !== null ? 'Evento actualizado exitosamente.' : 'Evento creado exitosamente.'
-                });
+                eventoEnEdicion = null; // Clear editing mode
+                document.getElementById('btn-submit').textContent = 'Crear Evento';
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Por favor complete todos los campos.'
-                });
+                // Creating a new event
+                const nuevoEvento = {
+                    id: Date.now().toString(),
+                    nombre: nombre,
+                    fecha: fecha,
+                    asistentes: asistentesSeleccionados
+                };
+                eventos.push(nuevoEvento);
+            }
+            localStorage.setItem('eventos', JSON.stringify(eventos));
+            cargarEventos(); // Reload events to update the list
+            Swal.fire('Éxito', 'Evento guardado correctamente.', 'success');
+            document.getElementById('evento-form').reset();
+            asistentesSeleccionados = [];
+            document.getElementById('asistentes-seleccionados').innerHTML = '';
+        }
+        // Function to cancel event creation/editing
+        function cancelarEvento() {
+            eventoEnEdicion = null; // Clear editing mode
+            document.getElementById('evento-form').reset();
+            asistentesSeleccionados = [];
+            document.getElementById('asistentes-seleccionados').innerHTML = '';
+            document.getElementById('btn-submit').textContent = 'Crear Evento';
+        }
+        // Function to edit an event
+        function editarEvento(id) {
+            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            eventoEnEdicion = eventos.find(evento => evento.id === id);
+            if (eventoEnEdicion) {
+                document.getElementById('evento-id').value = eventoEnEdicion.id;
+                document.getElementById('evento-nombre').value = eventoEnEdicion.nombre;
+                document.getElementById('evento-fecha').value = eventoEnEdicion.fecha;
+                asistentesSeleccionados = eventoEnEdicion.asistentes;
+                actualizarVistaAsistentesSeleccionados();
+                document.getElementById('btn-submit').textContent = 'Actualizar Evento';
             }
         }
-
-        function editarEvento(index) {
-            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
-            const evento = eventos[index];
-            
-            document.getElementById('evento-nombre').value = evento.nombre;
-            document.getElementById('evento-fecha').value = evento.fecha;
-            
-            const checkboxes = document.querySelectorAll('#asistentes-checkbox input');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = evento.asistentes.includes(checkbox.value);
-            });
-
-            eventoEnEdicion = index;
-            document.getElementById('btn-submit').textContent = 'Actualizar Evento';
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function eliminarEvento(index) {
+        // Function to delete an event
+        function eliminarEvento(id) {
             Swal.fire({
                 title: '¿Estás seguro?',
-                text: "No podrás revertir esta acción",
+                text: "No podrás revertir esto.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
+                confirmButtonText: 'Sí, eliminarlo!'
             }).then((result) => {
                 if (result.isConfirmed) {
                     let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
-                    eventos.splice(index, 1);
+                    eventos = eventos.filter(evento => evento.id !== id);
                     localStorage.setItem('eventos', JSON.stringify(eventos));
-                    cargarEventos();
-                    Swal.fire('Eliminado', 'El evento ha sido eliminado.', 'success');
+                    cargarEventos(); // Reload events to update the list
+                    Swal.fire(
+                        'Eliminado!',
+                        'El evento ha sido eliminado.',
+                        'success'
+                    );
                 }
             });
         }
-
-        function cancelarEvento() {
-            document.getElementById('evento-form').reset();
-            eventoEnEdicion = null;
-            document.getElementById('btn-submit').textContent = 'Crear Evento';
+       
+        // Function to export to PDF (placeholder)
+        function exportarPDF() {
+            Swal.fire('Exportar a PDF', 'Función no implementada.', 'info');
+        }
+        // Function to export to Excel (placeholder)
+        function exportarExcel() {
+            Swal.fire('Exportar a Excel', 'Función no implementada.', 'info');
         }
 
         function enviarCorreo(asistentes, nombreEvento, fechaEvento) {
@@ -479,30 +606,6 @@
             });
         }
 
-        
-        function exportarPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
-            let y = 10;
-            doc.setFont('Arial', 'normal');
-            doc.setFontSize(12);
-            doc.text('Eventos:', 10, y);
-            y += 10;
-            eventos.forEach(evento => {
-                doc.text(`Evento: ${evento.nombre}, Fecha: ${evento.fecha}`, 10, y);
-                y += 10;
-            });
-            doc.save('eventos.pdf');
-        }
-
-        function exportarExcel() {
-            const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
-            const ws = XLSX.utils.json_to_sheet(eventos);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Eventos');
-            XLSX.writeFile(wb, 'eventos.xlsx');
-        }
     </script>
 </body>
 
