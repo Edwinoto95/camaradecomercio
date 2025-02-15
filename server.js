@@ -31,7 +31,7 @@ const requireAuth = (req, res, next) => {
 
 // Usuario simulado para pruebas
 const users = [
-    { username: 'camara', password: 'comercio2025' }
+    { username: 'camara', password: 'CoM3RCIO_25' }
 ];
 
 // Conectar a MongoDB

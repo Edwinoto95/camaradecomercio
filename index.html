@@ -3,142 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Notificaciones | Cámara de Comercio de Latacunga</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Portal Empresarial | Cámara de Comercio de Latacunga</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --background: #f3f4f6;
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #3b82f6;
+            --accent-dark: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --card-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Manrope', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #007bff, #00bcd4);
-            color: white;
+            background: var(--background);
+            color: var(--primary);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .top-bar {
+            background: var(--primary);
+            height: 5px;
+            width: 100%;
+        }
+
+        .nav {
+            background: white;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            height: 100vh;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary) 30%, var(--accent) 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .welcome-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--card-shadow);
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        header {
-            background-color: rgba(0, 123, 255, 0.9);
-            width: 100%;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-dark) 100%);
         }
 
-        .container {
-            background-color: white;
-            color: #333;
-            padding: 40px;
-            border-radius: 12px;
-            margin: 30px auto;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 1s ease-in-out;
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary) 30%, var(--accent) 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .welcome-subtitle {
+            color: var(--primary-light);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
-        .container h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            font-weight: 600;
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
         }
 
-        .container p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #555;
-        }
-
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600;
+        .module-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
             cursor: pointer;
-            border-radius: 6px;
-            transition: background-color 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
-        button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
+        .module-card:hover {
+            transform: translateY(-5px);
         }
 
-        .logout-btn {
-            background-color: red;
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-dark) 100%);
+            opacity: 0;
+            transition: var(--transition);
         }
 
-        .logout-btn:hover {
-            background-color: darkred;
+        .module-card:hover::before {
+            opacity: 1;
         }
 
-        footer {
-            background-color: rgba(0, 123, 255, 0.9);
-            width: 100%;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        footer a {
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
             color: white;
-            text-decoration: none;
-            font-weight: bold;
+            transition: var(--transition);
         }
 
-        footer a:hover {
-            text-decoration: underline;
+        .module-card:hover .module-icon {
+            transform: scale(1.1);
+            background: var(--accent-dark);
+        }
+
+        .module-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .module-description {
+            color: var(--primary-light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: white;
+            padding: 2rem;
+            margin-top: auto;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--primary-light);
+        }
+
+        .footer-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-dark);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 1rem;
+                margin: 2rem auto;
+            }
+
+            .welcome-section {
+                padding: 2rem;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-
-    <header>Sistema de Notificaciones | Cámara de Comercio de Latacunga</header>
-
-    <div class="container">
-        <h1>Bienvenido</h1>
-        <p>Seleccione una opción para continuar con la gestión del sistema.</p>
-        <div class="button-container">
-            <button onclick="location.href='asistentes.html'">Gestionar Asistentes</button>
-            <button onclick="location.href='eventos.html'">Gestionar Eventos</button>
-            <form action="/logout" method="POST">
-                <button type="submit" class="logout-btn">Cerrar sesión</button>
-            </form>
+    <div class="top-bar"></div>
+    
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="brand">CCLatacunga</div>
         </div>
-    </div>
+    </nav>
 
-    <footer>
-        <p>&copy; 2025 Cámara de Comercio de Latacunga | <a href="#">Desarrollador:Edwin Danilo Oto Toapanta</a></p>
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1 class="welcome-title">Portal De Notificaciones</h1>
+            <p class="welcome-subtitle">Gestione sus notificaciones a los socios de CCLatacunga de manera eficiente y profesional</p>
+        </section>
+
+        <div class="modules-grid">
+            <div class="module-card" onclick="location.href='asistentes.html'">
+                <div class="module-icon">👥</div>
+                <h2 class="module-title">Gestión de Socios</h2>
+                <p class="module-description">Control y seguimiento de los Socios en eventos de la CCLatacunga.</p>
+                <a href="asistentes.html" class="btn btn-primary">Gestionar Asistentes</a>
+            </div>
+
+            <div class="module-card" onclick="location.href='eventos.html'">
+                <div class="module-icon">📅</div>
+                <h2 class="module-title">Gestión de Eventos</h2>
+                <p class="module-description">Organice y administre sus eventos corporativos.</p>
+                <a href="eventos.html" class="btn btn-primary">Gestionar Eventos</a>
+            </div>
+
+        
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Cámara de Comercio de Latacunga</p>
+            <p>Desarrollado por <a href="#" class="footer-link">Edwin Danilo Oto Toapanta</a></p>
+        </div>
     </footer>
-
 </body>
 </html>
