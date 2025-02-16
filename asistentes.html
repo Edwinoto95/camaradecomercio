@@ -275,18 +275,10 @@
         .btn-importar:hover {
             background-color: #0b7dda;
         }
-
-        /* Style for error messages */
-        .error-message {
-            color: red;
-            font-size: 0.8em;
-            margin-top: 0.25rem;
-        }
     </style>
 </head>
 
 <body>
-
     <header>
         <h1>Sistema de Notificaciones</h1>
         <nav>
@@ -300,7 +292,6 @@
             </form>
         </nav>
     </header>
-
     <div class="container">
         <h1>Gestión de Socios</h1>
         <form id="asistente-form">
@@ -311,8 +302,7 @@
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" required oninput="validateEmailInput(this.value)">
-                <div id="email-error" class="error-message"></div>
+                <input type="email" id="email" required>
             </div>
             <div class="acciones-container">
                 <button type="submit" class="btn-enviar"><i class="fas fa-save"></i> Guardar</button>
@@ -320,8 +310,6 @@
                     Cancelar</button>
             </div>
         </form>
-
-        <!-- File Import Section -->
         <div class="form-group">
             <label for="archivoTxt"> 📂 Selecciona un archivo TXT con nombres y correos:</label>
             <label class="file-label">
@@ -329,13 +317,8 @@
                 <input type="file" id="archivoTxt" accept=".txt" onchange="mostrarNombreArchivo()">
             </label>
             <p id="file-name">Ningún archivo seleccionado</p>
-            <div class="acciones-container">
-                <button onclick="importarAsistentes()" class="btn-importar"><i class="fas fa-file-import"></i>
-                    Importar</button>
-                <!-- Button to download invalid emails PDF (Moved Here) -->
-                <button class="btn-enviar" onclick="descargarInvalidEmailsPDF()"><i class="fas fa-file-pdf"></i>
-                    Descargar Correos Inválidos (PDF)</button>
-            </div>
+            <button onclick="importarAsistentes()" class="btn-importar"><i class="fas fa-file-import"></i>
+                Importar</button>
         </div>
 
         <div class="table-container">
@@ -357,6 +340,12 @@
             <button class="btn-enviar" onclick="descargarPDF()"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
             <button class="btn-enviar" onclick="descargarExcel()"><i class="fas fa-file-excel"></i> Descargar
                 Excel</button>
+            <!-- Button to download invalid emails -->
+            <button class="btn-enviar" onclick="descargarInvalidEmails()"><i class="fas fa-exclamation-triangle"></i>
+                Descargar Correos Inválidos (CSV)</button>
+            <!-- Button to download invalid emails as PDF -->
+            <button class="btn-enviar" onclick="descargarInvalidEmailsPDF()"><i class="fas fa-file-pdf"></i> Descargar
+                Correos Inválidos (PDF)</button>
         </div>
     </div>
 
@@ -375,6 +364,7 @@
         // Global variables
         let table;
         let invalidEmails = []; // Array to store invalid emails
+        let asistentesGlobal = [];
 
         // Function to sanitize input
         function sanitizeInput(input) {
@@ -383,10 +373,157 @@
             return tempDiv.innerHTML;
         }
 
-        // Function to load assistants
-        function cargarAsistentes() {
+        // Initialize DataTables
+        $(document).ready(function () {
+            table = $('#asistentes-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
+                }
+            });
+
+            cargarAsistentes();
+
+            // Configuration for iziToast messages
+            iziToast.settings({
+                timeout: 3000,
+                resetOnHover: true,
+                transitionIn: 'flipInX',
+                transitionOut: 'flipOutX',
+                position: 'topRight'
+            });
+        });
+
+        // Function to handle form submission
+        function submitAsistenteForm() {
+            const nombre = $('#nombre').val();
+            const email = $('#email').val();
+            const id = $('#asistente-id').val();
+
+            if (!nombre || !email) {
+                iziToast.error({
+                    title: 'Error',
+                    message: 'Por favor, completa todos los campos.',
+                    position: 'topRight'
+                });
+                return;
+            }
+
+            if (!validarEmail(email)) {
+                iziToast.error({
+                    title: 'Error',
+                    message: 'Por favor, introduce un correo electrónico válido.',
+                    position: 'topRight'
+                });
+                return;
+            }
+
             let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
 
+            if (id) {
+                // Editing existing assistant
+                asistentes[id] = {
+                    nombre: nombre,
+                    email: email
+                };
+                $('#asistente-id').val(''); // Reset ID after editing
+                iziToast.success({
+                    title: '¡Éxito!',
+                    message: 'Asistente actualizado correctamente.',
+                    position: 'topRight'
+                });
+            } else {
+                // Creating new assistant
+                asistentes.push({
+                    nombre: nombre,
+                    email: email
+                });
+                iziToast.success({
+                    title: '¡Éxito!',
+                    message: 'Asistente guardado correctamente.',
+                    position: 'topRight'
+                });
+            }
+
+            localStorage.setItem('asistentes', JSON.stringify(asistentes));
+            cargarAsistentes();
+            $('#asistente-form')[0].reset(); // Clear the form
+        }
+
+        // Function to cancel editing
+        function cancelarEdicion() {
+            $('#asistente-form')[0].reset(); // Clear the form
+            $('#asistente-id').val(''); // Clear the ID
+        }
+
+        // Function to display file name
+        function mostrarNombreArchivo() {
+            const archivoTxt = document.getElementById('archivoTxt');
+            const fileName = document.getElementById('file-name');
+
+            if (archivoTxt.files.length > 0) {
+                fileName.textContent = 'Archivo seleccionado: ' + archivoTxt.files[0].name;
+            } else {
+                fileName.textContent = 'Ningún archivo seleccionado';
+            }
+        }
+
+        // Function to import assistants from a TXT file
+        function importarAsistentes() {
+            const archivoTxt = document.getElementById('archivoTxt');
+
+            if (archivoTxt.files.length === 0) {
+                iziToast.error({
+                    title: 'Error',
+                    message: 'Por favor, selecciona un archivo TXT.',
+                    position: 'topRight'
+                });
+                return;
+            }
+
+            const file = archivoTxt.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const contenido = e.target.result;
+                const lineas = contenido.split('\n');
+                let nuevosAsistentes = [];
+
+                lineas.forEach(linea => {
+                    const partes = linea.split(','); // Assuming comma-separated values
+                    if (partes.length === 2) {
+                        const nombre = partes[0].trim();
+                        const email = partes[1].trim();
+                        nuevosAsistentes.push({ nombre: nombre, email: email });
+                    }
+                });
+
+                let asistentesExistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+                let asistentesActualizados = asistentesExistentes.concat(nuevosAsistentes);
+
+                localStorage.setItem('asistentes', JSON.stringify(asistentesActualizados));
+                cargarAsistentes();
+                iziToast.success({
+                    title: '¡Éxito!',
+                    message: 'Asistentes importados correctamente.',
+                    position: 'topRight'
+                });
+            };
+
+            reader.onerror = function () {
+                iziToast.error({
+                    title: 'Error',
+                    message: 'Error al leer el archivo.',
+                    position: 'topRight'
+                });
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Function to download assistants
+        function cargarAsistentes() {
+            let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            asistentesGlobal = asistentes;
             // Validate and clean the data before display
             asistentes = validarAsistentes(asistentes);
             localStorage.setItem('asistentes', JSON.stringify(asistentes));
@@ -405,43 +542,28 @@
             table.draw();
         }
 
-        // Function to validate assistants and determine the reason for invalidity
+        // Function to validate assistants
         function validarAsistentes(asistentes) {
             const emailsRegistrados = new Set();
             let asistentesValidados = [];
             invalidEmails = []; // Clear the array before processing
-
             asistentes.forEach(asistente => {
-                let invalidReason = '';
-                if (!asistente.email) {
-                    invalidReason = 'Correo electrónico vacío';
-                } else if (!validarEmail(asistente.email)) {
-                    invalidReason = 'Formato de correo electrónico inválido';
-                } else if (emailsRegistrados.has(asistente.email)) {
-                    invalidReason = 'Correo electrónico duplicado';
-                }
-
-                if (invalidReason) {
-                    // Store invalid emails with name and reason
-                    invalidEmails.push({
-                        nombre: asistente.nombre,
-                        email: asistente.email,
-                        reason: invalidReason
-                    });
-                    iziToast.warning({
-                        title: 'Aviso',
-                        message: `El correo ${asistente.email} no es válido: ${invalidReason}.`,
-                        position: 'topRight'
-                    });
-                } else {
+                if (asistente.email && validarEmail(asistente.email) && !emailsRegistrados.has(asistente.email)) {
                     emailsRegistrados.add(asistente.email);
                     asistentesValidados.push({
-                        nombre: sanitizeInput(asistente.nombre),
-                        email: sanitizeInput(asistente.email)
+                        nombre: sanitizeInput(asistente.nombre), // Sanitize on validation
+                        email: sanitizeInput(asistente.email)   // Sanitize on validation
+                    });
+                } else {
+                    // Store invalid emails
+                    invalidEmails.push(asistente.email);
+                    iziToast.warning({
+                        title: 'Aviso',
+                        message: `El correo ${asistente.email} no es válido o está duplicado.`,
+                        position: 'topRight'
                     });
                 }
             });
-
             return asistentesValidados;
         }
 
@@ -469,19 +591,10 @@
 
         // Basic email validation function
         function validarEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const regex = /^[^\s@]+@[^\s@]+\.([a-zA-Z]{2,})$/;
             return regex.test(email);
         }
-        // Function to validate email input in real-time
-        function validateEmailInput(email) {
-            let errorMessage = '';
-            if (email.trim() === '') {
-                errorMessage = 'Por favor, introduce un correo electrónico.';
-            } else if (!validarEmail(email)) {
-                errorMessage = 'Formato de correo electrónico inválido.';
-            }
-            document.getElementById('email-error').textContent = errorMessage;
-        }
+
         // Event listener for the assistant form submission
         $('#asistente-form').submit(function (e) {
             e.preventDefault();
@@ -508,18 +621,18 @@
                 };
                 $('#asistente-id').val(''); // Reset ID after editing
                 iziToast.success({
-                    title: '¡Éxito!',
+                    title: 'Éxito',
                     message: 'Asistente actualizado correctamente.',
                     position: 'topRight'
                 });
             } else {
-                // Adding new assistant
+                // Creating new assistant
                 asistentes.push({
                     nombre: nombre,
                     email: email
                 });
                 iziToast.success({
-                    title: '¡Éxito!',
+                    title: 'Éxito',
                     message: 'Asistente guardado correctamente.',
                     position: 'topRight'
                 });
@@ -529,145 +642,190 @@
             cargarAsistentes();
             $('#asistente-form')[0].reset(); // Clear the form
         });
-
-        // Function to cancel editing
-        function cancelarEdicion() {
-            $('#asistente-form')[0].reset();
-            $('#asistente-id').val('');
-        }
-
         // Function to download PDF
         function descargarPDF() {
-            const {
-                jsPDF
-            } = window.jspdf;
-            const doc = new jsPDF();
-            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-            let y = 10;
-            doc.text("Lista de Asistentes", 14, y);
-            y += 10;
+            // Recuperar los datos de localStorage
+            let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+
+            // Validar los asistentes para identificar duplicados y correos inválidos
+            let asistentesValidados = validarAsistentes(asistentes);
+
+            // Crear un objeto para almacenar los emails y sus duplicados
+            let duplicadosPorEmail = {};
+
+            // Identificar los asistentes duplicados
+            let emailsRegistrados = new Set();
             asistentes.forEach(asistente => {
-                doc.text(`${asistente.nombre} - ${asistente.email}`, 14, y);
-                y += 10;
+                if (emailsRegistrados.has(asistente.email)) {
+                    if (!duplicadosPorEmail[asistente.email]) {
+                        duplicadosPorEmail[asistente.email] = [];
+                    }
+                    duplicadosPorEmail[asistente.email].push(asistente);
+                } else {
+                    emailsRegistrados.add(asistente.email);
+                    if (!duplicadosPorEmail[asistente.email]) {
+                        duplicadosPorEmail[asistente.email] = [];
+                    }
+                    duplicadosPorEmail[asistente.email].push(asistente);
+                }
             });
-            doc.save('asistentes.pdf');
-        }
 
-        // Function to download Excel
-        function descargarExcel() {
-            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-            const ws = XLSX.utils.json_to_sheet(asistentes);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Asistentes');
-            XLSX.writeFile(wb, 'asistentes.xlsx');
-        }
+            // Filtrar el objeto para obtener solo los emails con duplicados
+            let emailsDuplicados = Object.keys(duplicadosPorEmail).filter(email => duplicadosPorEmail[email].length > 1);
 
-        function importarAsistentes() {
-            const archivo = document.getElementById("archivoTxt").files[0];
-            if (!archivo) {
-                iziToast.error({
-                    title: 'Error',
-                    message: 'Selecciona un archivo TXT'
-                });
-                return;
+            // Crear un nuevo documento PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Definir márgenes y espaciado
+            const margin = 10;
+            let y = margin;
+
+            // Añadir título del documento
+            doc.setFontSize(18);
+            doc.text('Lista de Asistentes', margin, y += 10);
+
+            // Configurar la fuente y el tamaño para el contenido
+            doc.setFontSize(12);
+
+            // Espaciado entre secciones
+            const sectionSpacing = 10;
+
+            // Función para añadir texto con ajuste de línea
+            function addTextWithLineBreaks(text, x, y, maxWidth) {
+                const words = text.split(' ');
+                let line = '';
+                let currentY = y;
+
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = line + words[i] + ' ';
+                    const testWidth = doc.getTextWidth(testLine);
+
+                    if (testWidth > maxWidth && i > 0) {
+                        doc.text(line, x, currentY);
+                        line = words[i] + ' ';
+                        currentY += 7; // Espacio entre líneas
+                    } else {
+                        line = testLine;
+                    }
+                }
+                doc.text(line, x, currentY);
+                return currentY;
             }
 
-            const lector = new FileReader();
-            lector.onload = function (event) {
-                const contenido = event.target.result.trim(); // Elimina espacios en blanco extras
-                const lineas = contenido.split("\n").map(linea => linea.trim());
-                let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-                let nuevosAsistentes = [];
+            // Añadir la lista de asistentes
+            doc.setFontSize(14);
+            doc.text('Asistentes:', margin, y += sectionSpacing);
+            doc.setFontSize(12);
 
-                lineas.forEach(linea => {
-                    if (linea) {
-                        const partes = linea.split(",");
-                        if (partes.length === 2) {
-                            const nombre = partes[0].trim();
-                            const email = partes[1].trim();
-                            if (nombre && email) {
-                                nuevosAsistentes.push({
-                                    nombre: nombre,
-                                    email: email
-                                });
-                            }
+            asistentesValidados.forEach(asistente => {
+                let maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+                doc.setFontSize(12);
+                doc.text(`Nombre: `, margin, y += 10);
+                y = addTextWithLineBreaks(asistente.nombre, margin + 15, y, maxWidth - 15);
+                doc.text(`Email: `, margin, y += 10);
+                y = addTextWithLineBreaks(asistente.email, margin + 15, y, maxWidth - 15);
+            });
+
+            // Añadir la lista de asistentes duplicados
+            if (emailsDuplicados.length > 0) {
+                doc.setFontSize(14);
+                doc.text('Asistentes Duplicados:', margin, y += sectionSpacing);
+                doc.setFontSize(12);
+
+                emailsDuplicados.forEach(email => {
+                    let asistentesDuplicados = duplicadosPorEmail[email];
+                    asistentesDuplicados.forEach(asistente => {
+                        let maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+                        doc.setFontSize(12);
+                        doc.text(`Estado: Duplicado`, margin, y += 10);
+                        doc.text(`Email: `, margin, y += 10);
+                        y = addTextWithLineBreaks(asistente.email, margin + 15, y, maxWidth - 15);
+                        doc.text(`Nombre: `, margin, y += 10);
+                        y = addTextWithLineBreaks(asistente.nombre, margin + 15, y, maxWidth - 15);
+
+                        // Listar con quién se duplica
+                        let duplicadosCon = asistentesDuplicados.filter(a => a !== asistente);
+                        if (duplicadosCon.length > 0) {
+                            doc.text(`Duplicado con:`, margin, y += 10);
+                            duplicadosCon.forEach(duplicado => {
+                                doc.text(`  - Nombre: ${duplicado.nombre}`, margin, y += 10);
+                                y = addTextWithLineBreaks(`  - Email: ${duplicado.email}`, margin, y, maxWidth - 15);
+                            });
                         }
-                    }
+                    });
                 });
+            }
 
-                // Add new assistants to existing ones and update local storage
-                asistentes = asistentes.concat(nuevosAsistentes);
-                localStorage.setItem('asistentes', JSON.stringify(asistentes));
-                cargarAsistentes(); // Reload the table with the new data
-                iziToast.success({
-                    title: '¡Éxito!',
-                    message: 'Asistentes importados correctamente.',
-                    position: 'topRight'
-                });
-            };
-            lector.onerror = function () {
-                iziToast.error({
-                    title: 'Error',
-                    message: 'Error al leer el archivo.'
-                });
-            };
-            lector.readAsText(archivo);
+            // Guardar o descargar el PDF
+            doc.save('lista_asistentes.pdf');
+        }
+        // Function to download Excel
+        function descargarExcel() {
+            let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            let asistentesValidados = validarAsistentes(asistentes); // Use the validated list
+
+            // Convert data to worksheet
+            const ws = XLSX.utils.json_to_sheet(asistentesValidados);
+
+            // Create workbook and add worksheet
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Asistentes");
+
+            // Generate Excel file and trigger download
+            XLSX.writeFile(wb, "asistentes.xlsx");
         }
 
-        // Function to download the list of invalid emails as a PDF
-        function descargarInvalidEmailsPDF() {
+        // Function to download invalid emails
+        function descargarInvalidEmails() {
             if (invalidEmails.length === 0) {
                 iziToast.info({
-                    title: 'Info',
+                    title: 'Información',
                     message: 'No hay correos electrónicos inválidos para descargar.',
                     position: 'topRight'
                 });
                 return;
             }
 
-            const {
-                jsPDF
-            } = window.jspdf;
+            const csvContent = "data:text/csv;charset=utf-8," + invalidEmails.map(e => `"${e}"`).join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "correos_invalidos.csv");
+            document.body.appendChild(link); // Required for FF
+
+            link.click();
+
+            document.body.removeChild(link); // Clean up
+        }
+
+        function descargarInvalidEmailsPDF() {
+            if (invalidEmails.length === 0) {
+                iziToast.info({
+                    title: 'Información',
+                    message: 'No hay correos electrónicos inválidos para descargar.',
+                    position: 'topRight'
+                });
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            let y = 10;
-
             doc.setFontSize(14);
-            doc.text("Lista de Correos Electrónicos Inválidos", 14, y);
-            y += 10;
+            doc.text('Correos Electrónicos Inválidos', 10, 10);
+            doc.setFontSize(12);
 
-            doc.setFontSize(10);
-            invalidEmails.forEach(item => {
-                const text = `${item.nombre} - ${item.email} (Razón: ${item.reason})`;
+            let y = 20;
+            invalidEmails.forEach(email => {
                 if (y > doc.internal.pageSize.getHeight() - 10) {
                     doc.addPage();
                     y = 10;
                 }
-                doc.text(text, 14, y);
-                y += 7;
+                doc.text(email, 10, y += 10);
             });
 
             doc.save('correos_invalidos.pdf');
         }
-
-        // Function to display the file name
-        function mostrarNombreArchivo() {
-            const archivo = document.getElementById("archivoTxt").files[0];
-            if (archivo) {
-                document.getElementById("file-name").textContent = "Archivo seleccionado: " + archivo.name;
-            } else {
-                document.getElementById("file-name").textContent = "Ningún archivo seleccionado";
-            }
-        }
-
-        // Initialize DataTables when the document is ready
-        $(document).ready(function () {
-            table = $('#asistentes-table').DataTable({
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
-                }
-            });
-            cargarAsistentes(); // Load assistants on page load
-        });
     </script>
 </body>
 
