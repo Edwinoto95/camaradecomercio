@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Empresarial | Cámara de Comercio de Latacunga</title>
+    <title>Portal Empresarial | GAD Tanicuchi</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -102,31 +102,45 @@
         .welcome-subtitle {
             color: var(--primary-light);
             font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
             line-height: 1.6;
+        }
+
+        .welcome-description {
+            color: var(--primary-light);
+            font-size: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+            opacity: 0.8;
         }
 
         .modules-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
             margin-top: 2rem;
+            justify-items: center;
         }
 
         .module-card {
             background: white;
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
         }
 
         .module-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         }
 
         .module-card::before {
@@ -146,41 +160,42 @@
         }
 
         .module-icon {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             background: var(--accent);
-            border-radius: 15px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
             color: white;
             transition: var(--transition);
         }
 
         .module-card:hover .module-icon {
-            transform: scale(1.1);
+            transform: scale(1.15);
             background: var(--accent-dark);
         }
 
         .module-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.4rem;
+            font-weight: 700;
             margin-bottom: 1rem;
             color: var(--primary);
         }
 
         .module-description {
             color: var(--primary-light);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-size: 1rem;
         }
 
         .btn {
             display: inline-block;
-            padding: 0.875rem 1.5rem;
-            border-radius: 10px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
             font-weight: 600;
             text-decoration: none;
             transition: var(--transition);
@@ -188,6 +203,7 @@
             cursor: pointer;
             width: 100%;
             font-size: 1rem;
+            text-align: center;
         }
 
         .btn-primary {
@@ -197,7 +213,8 @@
 
         .btn-primary:hover {
             background: var(--accent-dark);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
 
         .btn-danger {
@@ -207,7 +224,8 @@
 
         .btn-danger:hover {
             opacity: 0.9;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
         }
 
         .footer {
@@ -253,6 +271,11 @@
 
             .modules-grid {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .module-card {
+                max-width: none;
             }
 
             .footer-content {
@@ -268,37 +291,38 @@
     
     <nav class="nav">
         <div class="nav-content">
-            <div class="brand">CCLatacunga</div>
+            <div class="brand">GAD Tanicuchi</div>
         </div>
     </nav>
 
     <main class="main-content">
         <section class="welcome-section">
             <h1 class="welcome-title">Portal De Notificaciones</h1>
-            <p class="welcome-subtitle">Gestione sus notificaciones a los socios de CCLatacunga de manera eficiente y profesional</p>
+            <p class="welcome-subtitle">Sistema integral para la gestión eficiente de notificaciones y comunicación con los socios del GAD Tanicuchi</p>
+            <p class="welcome-description">Administre de manera centralizada toda la información de contacto, eventos y comunicaciones oficiales. Mantenga un control detallado de la participación ciudadana y optimice los procesos de notificación institucional para fortalecer la transparencia y participación comunitaria en nuestra gestión municipal.</p>
         </section>
 
         <div class="modules-grid">
             <div class="module-card" onclick="location.href='asistentes.html'">
                 <div class="module-icon">👥</div>
                 <h2 class="module-title">Gestión de Socios</h2>
-                <p class="module-description">Control y seguimiento de los Socios en eventos de la CCLatacunga.</p>
+                <p class="module-description">Sistema completo para el control, seguimiento y administración de todos los socios registrados en el GAD Tanicuchi. </p>
                 <a href="asistentes.html" class="btn btn-primary">Gestionar Socios</a>
             </div>
 
             <div class="module-card" onclick="location.href='eventos.html'">
                 <div class="module-icon">📅</div>
                 <h2 class="module-title">Gestión de Eventos</h2>
-                <p class="module-description">Organice y administre sus eventos corporativos.</p>
+                <p class="module-description">Optimice la planificación de reuniones, asambleas, capacitaciones y actividades comunitarias del GAD.</p>
                 <a href="eventos.html" class="btn btn-primary">Gestionar Eventos</a>
             </div>
-
-        
+        </div>
+    </main>
 
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2025 Cámara de Comercio de Latacunga</p>
-            <p>Desarrollado por <a href="#" class="footer-link">Edwin Danilo Oto Toapanta</a></p>
+            <p>&copy; 2025 GAD Tanicuchi - Gobierno Autónomo Descentralizado</p>
+            <p>Desarrollado por <a href="#" class="footer-link">Software UTC - Universidad Técnica de Cotopaxi</a></p>
         </div>
     </footer>
 </body>

@@ -31,7 +31,7 @@ const requireAuth = (req, res, next) => {
 
 // Usuario simulado para pruebas
 const users = [
-    { username: 'camara', password: 'CoM3RCIO_25' }
+    { username: 'gadtanicuchi', password: 'Tan&cuch&2025' }
 ];
 
 // Conectar a MongoDB
@@ -136,8 +136,28 @@ app.post('/enviar-correo', requireAuth, (req, res) => {
     const mailOptions = {
         from: process.env.EMAIL_HOST_USER,
         to: email,
-        subject: `Notificación de la Camara De Comercio De Latacunga : ${evento}`,
-        text: `🔔 Hola,Le enviamos un cordial saludo  \n\nLe informamos sobre un evento: ${evento}\nFecha: ${fecha}\n\n¡Esperamos contar con tu participación! Si necesitas más información, contáctanos.`
+        subject: `Invitación Oficial GAD Tanicuchi - ${evento}`,
+text: `🏛️ Estimado/a Socio/a del GAD Tanicuchi,
+
+Reciba un cordial saludo de parte del Gobierno Autónomo Descentralizado de Tanicuchi.
+
+Por medio del presente, tenemos el honor de invitarle al siguiente evento institucional:
+
+📅 EVENTO: ${evento}
+🗓️ FECHA: ${fecha}
+
+Su participación es muy importante para nosotros, ya que contribuye al fortalecimiento de nuestra comunidad y al desarrollo participativo de nuestro cantón.
+
+Para mayor información o consultas, no dude en contactarnos a través de nuestros canales oficiales.
+
+Agradecemos de antemano su tiempo y esperamos contar con su valiosa presencia.
+
+Atentamente,
+Equipo de Comunicación
+GAD Tanicuchi
+
+---
+Este es un mensaje automático del sistema de notificaciones del GAD Tanicuchi.`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
