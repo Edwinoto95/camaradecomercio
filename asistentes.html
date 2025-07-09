@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,13 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Custom Styles -->
     <style>
-        /* General Reset and Body Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f7fc;
@@ -27,8 +20,6 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* Header Styles */
         header {
             background-color: #007bff;
             color: white;
@@ -37,16 +28,8 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        header h1 {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-        }
-
-        nav {
-            display: flex;
-            gap: 0.8rem;
-        }
-
+        header h1 { font-size: clamp(1.2rem, 4vw, 1.5rem); }
+        nav { display: flex; gap: 0.8rem; }
         nav a {
             color: white;
             text-decoration: none;
@@ -56,26 +39,11 @@
             transition: background-color 0.3s ease-in-out;
             white-space: nowrap;
         }
-
-        nav a:hover {
-            background-color: #0056b3;
-        }
-
-        /* Responsive Header */
+        nav a:hover { background-color: #0056b3; }
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            nav {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+            header { flex-direction: column; gap: 1rem; text-align: center; }
+            nav { flex-wrap: wrap; justify-content: center; }
         }
-
-        /* Container Styles */
         .container {
             max-width: 1200px;
             margin: 1rem auto;
@@ -86,35 +54,21 @@
             width: 95%;
             flex: 1;
         }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 1.25rem;
-            font-size: clamp(1.5rem, 5vw, 2rem);
-        }
-
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
+        h1 { text-align: center; margin-bottom: 1.25rem; font-size: clamp(1.5rem, 5vw, 2rem); }
+        .form-group { margin-bottom: 1rem; }
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: bold;
             font-size: clamp(0.9rem, 2.5vw, 1rem);
         }
-
-        input,
-        select {
+        input, select {
             width: 100%;
             padding: 0.75rem;
             font-size: clamp(0.9rem, 2.5vw, 1rem);
             border-radius: 5px;
             border: 1px solid #ccc;
         }
-
-        /* Button Styles */
         button {
             padding: 0.75rem 1.25rem;
             font-size: clamp(0.9rem, 2.5vw, 1rem);
@@ -126,84 +80,36 @@
             justify-content: center;
             gap: 0.5rem;
         }
-
-        .btn-enviar {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-editar {
-            background-color: #ffc107;
-            color: white;
-        }
-
-        .btn-eliminar {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-enviar:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-editar:hover {
-            background-color: #e0a800;
-        }
-
-        .btn-eliminar:hover {
-            background-color: #c82333;
-        }
-
-        /* Table Styles */
-        .table-container {
-            margin-top: 1.25rem;
-            overflow-x: auto;
-        }
-
+        .btn-enviar { background-color: #007bff; color: white; }
+        .btn-editar { background-color: #ffc107; color: white; }
+        .btn-eliminar { background-color: #dc3545; color: white; }
+        .btn-enviar:hover { background-color: #0056b3; }
+        .btn-editar:hover { background-color: #e0a800; }
+        .btn-eliminar:hover { background-color: #c82333; }
+        .table-container { margin-top: 1.25rem; overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 1.25rem;
         }
-
-        th,
-        td {
+        th, td {
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid #ddd;
             font-size: clamp(0.85rem, 2.5vw, 1rem);
         }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        /* Actions Container */
+        th { background-color: #007bff; color: white; }
         .acciones-container {
             display: flex;
             gap: 0.625rem;
             flex-wrap: wrap;
             justify-content: flex-start;
         }
-
         @media (max-width: 640px) {
-            .acciones-container {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .acciones-container button {
-                width: 100%;
-            }
-
-            th,
-            td {
-                padding: 0.5rem;
-            }
+            .acciones-container { flex-direction: column; gap: 0.5rem; }
+            .acciones-container button { width: 100%; }
+            th, td { padding: 0.5rem; }
         }
-
-        /* Footer Styles */
         footer {
             background-color: #007bff;
             color: white;
@@ -212,21 +118,9 @@
             font-size: clamp(0.75rem, 2vw, 0.875rem);
             margin-top: auto;
         }
-
-        footer a {
-            color: white;
-            text-decoration: none;
-        }
-
-        /* DataTables Styles */
-        .dataTables_wrapper .dataTables_filter input {
-            max-width: 150px;
-        }
-
-        .dataTables_wrapper .dataTables_length select {
-            max-width: 60px;
-        }
-
+        footer a { color: white; text-decoration: none; }
+        .dataTables_wrapper .dataTables_filter input { max-width: 150px; }
+        .dataTables_wrapper .dataTables_length select { max-width: 60px; }
         @media (max-width: 768px) {
             .dataTables_wrapper .dataTables_filter,
             .dataTables_wrapper .dataTables_length {
@@ -234,8 +128,6 @@
                 margin-bottom: 1rem;
             }
         }
-
-        /* File Input Styles */
         .file-label {
             display: inline-block;
             padding: 0.75rem 1.25rem;
@@ -246,21 +138,13 @@
             cursor: pointer;
             margin-top: 0.5rem;
         }
-
-        .file-label:hover {
-            background-color: #367c39;
-        }
-
-        .file-label input[type="file"] {
-            display: none;
-        }
-
+        .file-label:hover { background-color: #367c39; }
+        .file-label input[type="file"] { display: none; }
         #file-name {
             margin-top: 0.5rem;
             font-style: italic;
             color: #777;
         }
-
         .btn-importar {
             background-color: #2196F3;
             color: white;
@@ -271,13 +155,9 @@
             cursor: pointer;
             margin-left: 0.5rem;
         }
-
-        .btn-importar:hover {
-            background-color: #0b7dda;
-        }
+        .btn-importar:hover { background-color: #0b7dda; }
     </style>
 </head>
-
 <body>
     <header>
         <h1>Sistema de Notificaciones</h1>
@@ -320,7 +200,6 @@
             <button onclick="importarAsistentes()" class="btn-importar"><i class="fas fa-file-import"></i>
                 Importar</button>
         </div>
-
         <div class="table-container">
             <table id="asistentes-table" class="display">
                 <thead>
@@ -335,29 +214,23 @@
                 </tbody>
             </table>
         </div>
-
         <div class="acciones-container">
             <button class="btn-enviar" onclick="descargarPDF()"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
             <button class="btn-enviar" onclick="descargarExcel()"><i class="fas fa-file-excel"></i> Descargar
                 Excel</button>
-        
-            <!-- Button to download invalid emails as PDF -->
             <button class="btn-enviar" onclick="descargarInvalidEmailsPDF()"><i class="fas fa-file-pdf"></i> Descargar
                 Correos Inválidos (PDF)</button>
         </div>
     </div>
-
     <footer>
         <p>&copy; 2025 Sistema de Notificaciones | Desarrollado por <strong>Edwin Danilo Oto Toapanta</strong></p>
     </footer>
-
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-
     <script>
         // Global variables
         let table;
@@ -457,7 +330,6 @@
         function mostrarNombreArchivo() {
             const archivoTxt = document.getElementById('archivoTxt');
             const fileName = document.getElementById('file-name');
-
             if (archivoTxt.files.length > 0) {
                 fileName.textContent = 'Archivo seleccionado: ' + archivoTxt.files[0].name;
             } else {
@@ -468,7 +340,6 @@
         // Function to import assistants from a TXT file
         function importarAsistentes() {
             const archivoTxt = document.getElementById('archivoTxt');
-
             if (archivoTxt.files.length === 0) {
                 iziToast.error({
                     title: 'Error',
@@ -477,27 +348,22 @@
                 });
                 return;
             }
-
             const file = archivoTxt.files[0];
             const reader = new FileReader();
-
             reader.onload = function (e) {
                 const contenido = e.target.result;
                 const lineas = contenido.split('\n');
                 let nuevosAsistentes = [];
-
                 lineas.forEach(linea => {
-                    const partes = linea.split(','); // Assuming comma-separated values
+                    const partes = linea.split(',');
                     if (partes.length === 2) {
                         const nombre = partes[0].trim();
                         const email = partes[1].trim();
                         nuevosAsistentes.push({ nombre: nombre, email: email });
                     }
                 });
-
                 let asistentesExistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
                 let asistentesActualizados = asistentesExistentes.concat(nuevosAsistentes);
-
                 localStorage.setItem('asistentes', JSON.stringify(asistentesActualizados));
                 cargarAsistentes();
                 iziToast.success({
@@ -506,7 +372,6 @@
                     position: 'topRight'
                 });
             };
-
             reader.onerror = function () {
                 iziToast.error({
                     title: 'Error',
@@ -514,7 +379,6 @@
                     position: 'topRight'
                 });
             };
-
             reader.readAsText(file);
         }
 
@@ -525,16 +389,15 @@
             // Validate and clean the data before display
             asistentes = validarAsistentes(asistentes);
             localStorage.setItem('asistentes', JSON.stringify(asistentes));
-
             table.clear();
             asistentes.forEach((asistente, index) => {
                 table.row.add([
-                    sanitizeInput(asistente.nombre), // Sanitize the name
-                    sanitizeInput(asistente.email),  // Sanitize the email
+                    sanitizeInput(asistente.nombre),
+                    sanitizeInput(asistente.email),
                     `<div class="acciones-container">
-                    <button class="btn-editar" onclick="editarAsistente(${index})"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="btn-eliminar" onclick="eliminarAsistente(${index})"><i class="fas fa-trash"></i> Eliminar</button>
-                </div>`
+                        <button class="btn-editar" onclick="editarAsistente(${index})"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn-eliminar" onclick="eliminarAsistente(${index})"><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>`
                 ]);
             });
             table.draw();
@@ -544,16 +407,15 @@
         function validarAsistentes(asistentes) {
             const emailsRegistrados = new Set();
             let asistentesValidados = [];
-            invalidEmails = []; // Clear the array before processing
+            invalidEmails = [];
             asistentes.forEach(asistente => {
                 if (asistente.email && validarEmail(asistente.email) && !emailsRegistrados.has(asistente.email)) {
                     emailsRegistrados.add(asistente.email);
                     asistentesValidados.push({
-                        nombre: sanitizeInput(asistente.nombre), // Sanitize on validation
-                        email: sanitizeInput(asistente.email)   // Sanitize on validation
+                        nombre: sanitizeInput(asistente.nombre),
+                        email: sanitizeInput(asistente.email)
                     });
                 } else {
-                    // Store invalid emails
                     invalidEmails.push(asistente.email);
                     iziToast.warning({
                         title: 'Aviso',
@@ -565,16 +427,33 @@
             return asistentesValidados;
         }
 
-        // Function to delete assistant
+        // FUNCIÓN MODIFICADA: Eliminar asistente con confirmación
         function eliminarAsistente(index) {
-            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-            asistentes.splice(index, 1);
-            localStorage.setItem('asistentes', JSON.stringify(asistentes));
-            cargarAsistentes();
-            iziToast.success({
-                title: '¡Éxito!',
-                message: 'Asistente eliminado correctamente.',
-                position: 'topRight'
+            iziToast.question({
+                timeout: false,
+                close: false,
+                overlay: true,
+                displayMode: 'once',
+                title: '¿Estás seguro?',
+                message: '¿Realmente deseas eliminar este asistente?',
+                position: 'center',
+                buttons: [
+                    ['<button><b>Sí, eliminar</b></button>', function (instance, toast) {
+                        const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+                        asistentes.splice(index, 1);
+                        localStorage.setItem('asistentes', JSON.stringify(asistentes));
+                        cargarAsistentes();
+                        iziToast.success({
+                            title: '¡Éxito!',
+                            message: 'Asistente eliminado correctamente.',
+                            position: 'topRight'
+                        });
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    }, true],
+                    ['<button>Cancelar</button>', function (instance, toast) {
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    }]
+                ]
             });
         }
 
@@ -599,7 +478,6 @@
             const nombre = $('#nombre').val();
             const email = $('#email').val();
             const id = $('#asistente-id').val();
-
             if (!validarEmail(email)) {
                 iziToast.error({
                     title: 'Error',
@@ -608,23 +486,19 @@
                 });
                 return;
             }
-
             let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-
             if (id) {
-                // Editing existing assistant
                 asistentes[id] = {
                     nombre: nombre,
                     email: email
                 };
-                $('#asistente-id').val(''); // Reset ID after editing
+                $('#asistente-id').val('');
                 iziToast.success({
                     title: 'Éxito',
                     message: 'Asistente actualizado correctamente.',
                     position: 'topRight'
                 });
             } else {
-                // Creating new assistant
                 asistentes.push({
                     nombre: nombre,
                     email: email
@@ -635,23 +509,16 @@
                     position: 'topRight'
                 });
             }
-
             localStorage.setItem('asistentes', JSON.stringify(asistentes));
             cargarAsistentes();
-            $('#asistente-form')[0].reset(); // Clear the form
+            $('#asistente-form')[0].reset();
         });
+
         // Function to download PDF
         function descargarPDF() {
-            // Recuperar los datos de localStorage
             let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-
-            // Validar los asistentes para identificar duplicados y correos inválidos
             let asistentesValidados = validarAsistentes(asistentes);
-
-            // Crear un objeto para almacenar los emails y sus duplicados
             let duplicadosPorEmail = {};
-
-            // Identificar los asistentes duplicados
             let emailsRegistrados = new Set();
             asistentes.forEach(asistente => {
                 if (emailsRegistrados.has(asistente.email)) {
@@ -667,42 +534,26 @@
                     duplicadosPorEmail[asistente.email].push(asistente);
                 }
             });
-
-            // Filtrar el objeto para obtener solo los emails con duplicados
             let emailsDuplicados = Object.keys(duplicadosPorEmail).filter(email => duplicadosPorEmail[email].length > 1);
-
-            // Crear un nuevo documento PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
-            // Definir márgenes y espaciado
             const margin = 10;
             let y = margin;
-
-            // Añadir título del documento
             doc.setFontSize(18);
             doc.text('Lista de Asistentes', margin, y += 10);
-
-            // Configurar la fuente y el tamaño para el contenido
             doc.setFontSize(12);
-
-            // Espaciado entre secciones
             const sectionSpacing = 10;
-
-            // Función para añadir texto con ajuste de línea
             function addTextWithLineBreaks(text, x, y, maxWidth) {
                 const words = text.split(' ');
                 let line = '';
                 let currentY = y;
-
                 for (let i = 0; i < words.length; i++) {
                     const testLine = line + words[i] + ' ';
                     const testWidth = doc.getTextWidth(testLine);
-
                     if (testWidth > maxWidth && i > 0) {
                         doc.text(line, x, currentY);
                         line = words[i] + ' ';
-                        currentY += 7; // Espacio entre líneas
+                        currentY += 7;
                     } else {
                         line = testLine;
                     }
@@ -710,12 +561,9 @@
                 doc.text(line, x, currentY);
                 return currentY;
             }
-
-            // Añadir la lista de asistentes
             doc.setFontSize(14);
             doc.text('Asistentes:', margin, y += sectionSpacing);
             doc.setFontSize(12);
-
             asistentesValidados.forEach(asistente => {
                 let maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
                 doc.setFontSize(12);
@@ -724,13 +572,10 @@
                 doc.text(`Email: `, margin, y += 10);
                 y = addTextWithLineBreaks(asistente.email, margin + 15, y, maxWidth - 15);
             });
-
-            // Añadir la lista de asistentes duplicados
             if (emailsDuplicados.length > 0) {
                 doc.setFontSize(14);
                 doc.text('Asistentes Duplicados:', margin, y += sectionSpacing);
                 doc.setFontSize(12);
-
                 emailsDuplicados.forEach(email => {
                     let asistentesDuplicados = duplicadosPorEmail[email];
                     asistentesDuplicados.forEach(asistente => {
@@ -741,8 +586,6 @@
                         y = addTextWithLineBreaks(asistente.email, margin + 15, y, maxWidth - 15);
                         doc.text(`Nombre: `, margin, y += 10);
                         y = addTextWithLineBreaks(asistente.nombre, margin + 15, y, maxWidth - 15);
-
-                        // Listar con quién se duplica
                         let duplicadosCon = asistentesDuplicados.filter(a => a !== asistente);
                         if (duplicadosCon.length > 0) {
                             doc.text(`Duplicado con:`, margin, y += 10);
@@ -754,23 +597,16 @@
                     });
                 });
             }
-
-            // Guardar o descargar el PDF
             doc.save('lista_asistentes.pdf');
         }
+
         // Function to download Excel
         function descargarExcel() {
             let asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-            let asistentesValidados = validarAsistentes(asistentes); // Use the validated list
-
-            // Convert data to worksheet
+            let asistentesValidados = validarAsistentes(asistentes);
             const ws = XLSX.utils.json_to_sheet(asistentesValidados);
-
-            // Create workbook and add worksheet
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Asistentes");
-
-            // Generate Excel file and trigger download
             XLSX.writeFile(wb, "asistentes.xlsx");
         }
 
@@ -784,17 +620,14 @@
                 });
                 return;
             }
-
             const csvContent = "data:text/csv;charset=utf-8," + invalidEmails.map(e => `"${e}"`).join('\n');
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "correos_invalidos.csv");
-            document.body.appendChild(link); // Required for FF
-
+            document.body.appendChild(link);
             link.click();
-
-            document.body.removeChild(link); // Clean up
+            document.body.removeChild(link);
         }
 
         function descargarInvalidEmailsPDF() {
@@ -806,13 +639,11 @@
                 });
                 return;
             }
-
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.setFontSize(14);
             doc.text('Correos Electrónicos Inválidos', 10, 10);
             doc.setFontSize(12);
-
             let y = 20;
             invalidEmails.forEach(email => {
                 if (y > doc.internal.pageSize.getHeight() - 10) {
@@ -821,10 +652,8 @@
                 }
                 doc.text(email, 10, y += 10);
             });
-
             doc.save('correos_invalidos.pdf');
         }
     </script>
 </body>
-
 </html>

@@ -330,8 +330,7 @@
                 <tbody id="eventos-lista"></tbody>
             </table>
         </div>
-        <button class="btn-exportar" onclick="exportarPDF()">Exportar a PDF</button>
-        <button class="btn-exportar" onclick="exportarExcel()">Exportar a Excel</button>
+     
     </div>
     <!-- The Modal -->
     <div id="modalAsistentes" class="modal">
@@ -570,15 +569,7 @@
             });
         }
        
-        // Function to export to PDF (placeholder)
-        function exportarPDF() {
-            Swal.fire('Exportar a PDF', 'Función no implementada.', 'info');
-        }
-        // Function to export to Excel (placeholder)
-        function exportarExcel() {
-            Swal.fire('Exportar a Excel', 'Función no implementada.', 'info');
-        }
-
+       
         function enviarCorreo(asistentes, nombreEvento, fechaEvento) {
             const emailsArray = asistentes.split(', ');
             emailsArray.forEach(email => {
