@@ -145,17 +145,19 @@
             font-style: italic;
             color: #777;
         }
-        .btn-importar {
-            background-color: #2196F3;
-            color: white;
-            padding: 0.75rem 1.25rem;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            margin-left: 0.5rem;
+        .loading-indicator {
+            display: none;
+            margin-top: 0.5rem;
+            color: #007bff;
+            font-weight: bold;
         }
-        .btn-importar:hover { background-color: #0b7dda; }
+        .loading-indicator i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -191,14 +193,20 @@
             </div>
         </form>
         <div class="form-group">
-            <label for="archivoTxt"> 📂 Selecciona un archivo TXT con nombres y correos:</label>
+           <label for="archivoTxt" style="font-weight:bold; display:block; margin:15px 0 10px 0;">📂 Selecciona un archivo TXT con nombres y correos (Ejemplo):</label>
+<label for="archivoTxt" style="margin:5px 0; margin-left:20px; color:#555; display:block;">Carlos Pérez, carlos.perez1985@gmail.com</label>
+<label for="archivoTxt" style="margin:5px 0; margin-left:20px; color:#555; display:block;">Jorge Andrade, jorge.andrade@gmail.com</label>
+
+
+
             <label class="file-label">
                 <i class="fas fa-upload"></i> Elegir Archivo
-                <input type="file" id="archivoTxt" accept=".txt" onchange="mostrarNombreArchivo()">
+                <input type="file" id="archivoTxt" accept=".txt" onchange="importarAsistentesAutomatico()">
             </label>
             <p id="file-name">Ningún archivo seleccionado</p>
-            <button onclick="importarAsistentes()" class="btn-importar"><i class="fas fa-file-import"></i>
-                Importar</button>
+            <div class="loading-indicator" id="loading-indicator">
+                <i class="fas fa-spinner"></i> Procesando archivo...
+            </div>
         </div>
         <div class="table-container">
             <table id="asistentes-table" class="display">
@@ -326,59 +334,94 @@
             $('#asistente-id').val(''); // Clear the ID
         }
 
-        // Function to display file name
-        function mostrarNombreArchivo() {
+        // FUNCIÓN MODIFICADA: Importar asistentes automáticamente al seleccionar archivo
+        function importarAsistentesAutomatico() {
             const archivoTxt = document.getElementById('archivoTxt');
             const fileName = document.getElementById('file-name');
-            if (archivoTxt.files.length > 0) {
-                fileName.textContent = 'Archivo seleccionado: ' + archivoTxt.files[0].name;
-            } else {
-                fileName.textContent = 'Ningún archivo seleccionado';
-            }
-        }
-
-        // Function to import assistants from a TXT file
-        function importarAsistentes() {
-            const archivoTxt = document.getElementById('archivoTxt');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            
             if (archivoTxt.files.length === 0) {
-                iziToast.error({
-                    title: 'Error',
-                    message: 'Por favor, selecciona un archivo TXT.',
-                    position: 'topRight'
-                });
+                fileName.textContent = 'Ningún archivo seleccionado';
                 return;
             }
+            
             const file = archivoTxt.files[0];
+            fileName.textContent = 'Archivo seleccionado: ' + file.name;
+            
+            // Mostrar indicador de carga
+            loadingIndicator.style.display = 'block';
+            
             const reader = new FileReader();
+            
             reader.onload = function (e) {
-                const contenido = e.target.result;
-                const lineas = contenido.split('\n');
-                let nuevosAsistentes = [];
-                lineas.forEach(linea => {
-                    const partes = linea.split(',');
-                    if (partes.length === 2) {
-                        const nombre = partes[0].trim();
-                        const email = partes[1].trim();
-                        nuevosAsistentes.push({ nombre: nombre, email: email });
+                try {
+                    const contenido = e.target.result;
+                    const lineas = contenido.split('\n');
+                    let nuevosAsistentes = [];
+                    let lineasProcesadas = 0;
+                    let lineasValidas = 0;
+                    
+                    lineas.forEach(linea => {
+                        lineasProcesadas++;
+                        const lineaLimpia = linea.trim();
+                        
+                        if (lineaLimpia === '') return; // Saltar líneas vacías
+                        
+                        const partes = lineaLimpia.split(',');
+                        if (partes.length >= 2) {
+                            const nombre = partes[0].trim();
+                            const email = partes[1].trim();
+                            
+                            if (nombre && email) {
+                                nuevosAsistentes.push({ nombre: nombre, email: email });
+                                lineasValidas++;
+                            }
+                        }
+                    });
+                    
+                    if (nuevosAsistentes.length > 0) {
+                        let asistentesExistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+                        let asistentesActualizados = asistentesExistentes.concat(nuevosAsistentes);
+                        localStorage.setItem('asistentes', JSON.stringify(asistentesActualizados));
+                        cargarAsistentes();
+                        
+                        iziToast.success({
+                            title: '¡Éxito!',
+                            message: `${lineasValidas} Socios importados correctamente de ${lineasProcesadas} líneas procesadas.`,
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    } else {
+                        iziToast.warning({
+                            title: 'Advertencia',
+                            message: 'No se encontraron datos válidos en el archivo. Asegúrate de que el formato sea: Nombre,Email',
+                            position: 'topRight'
+                        });
                     }
-                });
-                let asistentesExistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
-                let asistentesActualizados = asistentesExistentes.concat(nuevosAsistentes);
-                localStorage.setItem('asistentes', JSON.stringify(asistentesActualizados));
-                cargarAsistentes();
-                iziToast.success({
-                    title: '¡Éxito!',
-                    message: 'Asistentes importados correctamente.',
-                    position: 'topRight'
-                });
+                } catch (error) {
+                    iziToast.error({
+                        title: 'Error',
+                        message: 'Error al procesar el archivo. Verifica el formato.',
+                        position: 'topRight'
+                    });
+                } finally {
+                    // Ocultar indicador de carga
+                    loadingIndicator.style.display = 'none';
+                    // Limpiar el input file para permitir seleccionar el mismo archivo nuevamente
+                    archivoTxt.value = '';
+                }
             };
+            
             reader.onerror = function () {
+                loadingIndicator.style.display = 'none';
                 iziToast.error({
                     title: 'Error',
                     message: 'Error al leer el archivo.',
                     position: 'topRight'
                 });
+                archivoTxt.value = '';
             };
+            
             reader.readAsText(file);
         }
 
@@ -435,7 +478,7 @@
                 overlay: true,
                 displayMode: 'once',
                 title: '¿Estás seguro?',
-                message: '¿Realmente deseas eliminar este asistente?',
+                message: '¿Realmente deseas eliminar este socio?',
                 position: 'center',
                 buttons: [
                     ['<button><b>Sí, eliminar</b></button>', function (instance, toast) {
@@ -445,7 +488,7 @@
                         cargarAsistentes();
                         iziToast.success({
                             title: '¡Éxito!',
-                            message: 'Asistente eliminado correctamente.',
+                            message: 'Socio eliminado correctamente.',
                             position: 'topRight'
                         });
                         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
@@ -505,7 +548,7 @@
                 });
                 iziToast.success({
                     title: 'Éxito',
-                    message: 'Asistente guardado correctamente.',
+                    message: 'Socio guardado correctamente.',
                     position: 'topRight'
                 });
             }

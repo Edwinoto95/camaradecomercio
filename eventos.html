@@ -88,6 +88,19 @@
             border: 1px solid #ccc;
         }
 
+        /* Estilo para input de fecha con error */
+        .fecha-error {
+            border: 2px solid #dc3545 !important;
+            background-color: #ffe6e6;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -202,16 +215,62 @@
             font-size: 14px;
         }
 
+        /* Estilos mejorados para el listado de socios */
         .checkbox-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
         }
 
-        .checkbox-container label {
+        .checkbox-item {
             display: flex;
             align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background-color: #f0f8ff;
+            border-color: #007bff;
+        }
+
+        .checkbox-item label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            cursor: pointer;
+            width: 100%;
+            font-weight: normal;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .socio-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .socio-nombre {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .socio-email {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
         }
 
         footer {
@@ -243,14 +302,14 @@
 
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%;
-            max-height: 70vh;
-            /* Altura máxima para evitar que la ventana modal sea demasiado grande */
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
             overflow-y: auto;
-            /* Agrega scroll si el contenido excede la altura máxima */
+            border-radius: 10px;
         }
 
         .close {
@@ -274,7 +333,54 @@
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Estilos para los botones del modal */
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: space-between;
+        }
+
+        .btn-select-all {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-select-all:hover {
+            background-color: #138496;
+        }
+
+        .btn-save-selection {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-save-selection:hover {
+            background-color: #218838;
+        }
+
+        /* Contador de seleccionados */
+        .selection-counter {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #495057;
         }
     </style>
 </head>
@@ -304,6 +410,9 @@
             <div class="form-group">
                 <label for="evento-fecha">Fecha:</label>
                 <input type="date" id="evento-fecha" required>
+                <div id="fecha-error" class="error-message">
+                    No se pueden seleccionar fechas pasadas. Por favor, seleccione una fecha actual o futura.
+                </div>
             </div>
             <div class="form-group">
                 <label for="asistentes-select">Seleccionar Socios:</label>
@@ -338,13 +447,21 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModalAsistentes()">&times;</span>
             <h2>Seleccionar Socios</h2>
+            
             <input type="text" id="search-input" placeholder="Buscar socio por nombre o correo">
-            <button type="button" id="select-all-btn" onclick="seleccionarTodosLosAsistentes()">Seleccionar
-                Todos</button>
+            
+            <div class="selection-counter" id="selection-counter">
+                Socios seleccionados: <span id="counter-number">0</span>
+            </div>
+            
             <div id="asistentes-checkbox" class="checkbox-container">
                 <!-- Aquí se generarán los checkboxes de los socios -->
             </div>
-            <button type="button" onclick="guardarAsistentesSeleccionados()">Guardar Seleccionados</button>
+            
+            <div class="modal-buttons">
+                <button type="button" id="select-all-btn" class="btn-select-all" onclick="seleccionarTodosLosAsistentes()">Seleccionar Todos</button>
+                <button type="button" class="btn-save-selection" onclick="guardarAsistentesSeleccionados()">Guardar Seleccionados</button>
+            </div>
         </div>
     </div>
     <footer>
@@ -356,77 +473,177 @@
         let eventoEnEdicion = null;
         let dataTable = null;
         let asistentesSeleccionados = []; // Array para guardar los asistentes seleccionados
+        let todosLosAsistentes = []; // Array para guardar todos los asistentes disponibles
 
         document.addEventListener('DOMContentLoaded', function () {
             cargarAsistentes();
             cargarEventos();
+            configurarValidacionFecha();
 
             document.getElementById('evento-form').addEventListener('submit', function (e) {
                 e.preventDefault();
                 guardarEvento();
             });
         });
+
+        // Función para configurar la validación de fecha
+        function configurarValidacionFecha() {
+            const fechaInput = document.getElementById('evento-fecha');
+            const errorMessage = document.getElementById('fecha-error');
+            
+            // Establecer la fecha mínima como hoy
+            const hoy = new Date();
+            const fechaMinima = hoy.toISOString().split('T')[0];
+            fechaInput.setAttribute('min', fechaMinima);
+
+            // Validación en tiempo real cuando el usuario cambia la fecha
+            fechaInput.addEventListener('change', function() {
+                validarFecha();
+            });
+
+            // Validación cuando el usuario escribe en el campo
+            fechaInput.addEventListener('input', function() {
+                validarFecha();
+            });
+        }
+
+        // Función para validar la fecha seleccionada
+        function validarFecha() {
+            const fechaInput = document.getElementById('evento-fecha');
+            const errorMessage = document.getElementById('fecha-error');
+            
+            if (!fechaInput.value) {
+                fechaInput.classList.remove('fecha-error');
+                errorMessage.style.display = 'none';
+                return true;
+            }
+            
+            const fechaSeleccionada = fechaInput.value; // Formato YYYY-MM-DD
+            const hoy = new Date();
+            const fechaHoy = hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
+            if (fechaSeleccionada < fechaHoy) {
+                fechaInput.classList.add('fecha-error');
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                fechaInput.classList.remove('fecha-error');
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+
         // Función para abrir el modal de asistentes
         function abrirModalAsistentes() {
             document.getElementById('modalAsistentes').style.display = 'block';
+            cargarAsistentesEnModal();
+            actualizarContador();
         }
+        
         // Función para cerrar el modal de asistentes
         function cerrarModalAsistentes() {
             document.getElementById('modalAsistentes').style.display = 'none';
         }
-        // Función para cargar los asistentes en el modal
+        
+        // Función para cargar los asistentes desde localStorage
         function cargarAsistentes() {
-            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+            todosLosAsistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
+        }
+
+        // Función para cargar los asistentes en el modal con el nuevo diseño
+        function cargarAsistentesEnModal() {
             const container = document.getElementById('asistentes-checkbox');
             container.innerHTML = '';
-            asistentes.forEach(asistente => {
-                const label = document.createElement('label');
-                label.innerHTML = `
-                    <input type="checkbox" value="${asistente.email}" data-nombre="${asistente.nombre}" onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
-                    ${asistente.nombre}
+            
+            todosLosAsistentes.forEach(asistente => {
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'checkbox-item';
+                
+                const isChecked = asistentesSeleccionados.includes(asistente.email) ? 'checked' : '';
+                
+                checkboxItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${asistente.email}" ${isChecked} onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
+                        <div class="socio-info">
+                            <div class="socio-nombre">${asistente.nombre}</div>
+                            <div class="socio-email">${asistente.email}</div>
+                        </div>
+                    </label>
                 `;
-                container.appendChild(label);
+                container.appendChild(checkboxItem);
             });
+            
             // Agrega el evento de escucha para la búsqueda
             document.getElementById('search-input').addEventListener('input', buscarAsistentes);
         }
-        // Función para buscar asistentes
+        
+        // Función para buscar asistentes mejorada
         function buscarAsistentes() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const asistentes = JSON.parse(localStorage.getItem('asistentes')) || [];
             const container = document.getElementById('asistentes-checkbox');
             container.innerHTML = '';
-            asistentes.forEach(asistente => {
-                if (asistente.nombre.toLowerCase().includes(searchTerm) || asistente.email.toLowerCase().includes(searchTerm)) {
-                    const label = document.createElement('label');
-                    label.innerHTML = `
-                        <input type="checkbox" value="${asistente.email}" data-nombre="${asistente.nombre}" onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
-                        ${asistente.nombre}
-                    `;
-                    container.appendChild(label);
-                }
+            
+            const asistentesFiltrados = todosLosAsistentes.filter(asistente => 
+                asistente.nombre.toLowerCase().includes(searchTerm) || 
+                asistente.email.toLowerCase().includes(searchTerm)
+            );
+            
+            asistentesFiltrados.forEach(asistente => {
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'checkbox-item';
+                
+                const isChecked = asistentesSeleccionados.includes(asistente.email) ? 'checked' : '';
+                
+                checkboxItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${asistente.email}" ${isChecked} onchange="actualizarAsistentesSeleccionados('${asistente.email}')">
+                        <div class="socio-info">
+                            <div class="socio-nombre">${asistente.nombre}</div>
+                            <div class="socio-email">${asistente.email}</div>
+                        </div>
+                    </label>
+                `;
+                container.appendChild(checkboxItem);
             });
         }
-        // Función para seleccionar o deseleccionar todos los asistentes
+        
+        // Función mejorada para seleccionar o deseleccionar todos los asistentes
         function seleccionarTodosLosAsistentes() {
             const checkboxes = document.querySelectorAll('#asistentes-checkbox input[type="checkbox"]');
+            const btn = document.getElementById('select-all-btn');
+            
+            // Verificar si todos están seleccionados
             const todosSeleccionados = Array.from(checkboxes).every(checkbox => checkbox.checked);
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = !todosSeleccionados;
-                const email = checkbox.value;
-                if (!todosSeleccionados) {
-                    // If we are selecting all, add the email if it's not already there
+            
+            if (todosSeleccionados) {
+                // Deseleccionar todos
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    const email = checkbox.value;
+                    asistentesSeleccionados = asistentesSeleccionados.filter(e => e !== email);
+                });
+                btn.textContent = 'Seleccionar Todos';
+                btn.style.backgroundColor = '#17a2b8';
+            } else {
+                // Seleccionar todos
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    const email = checkbox.value;
                     if (!asistentesSeleccionados.includes(email)) {
                         asistentesSeleccionados.push(email);
                     }
-                } else {
-                    // If we are deselecting all, remove the email if it's there
-                    asistentesSeleccionados = asistentesSeleccionados.filter(e => e !== email);
-                }
-            });
+                });
+                btn.textContent = 'Deseleccionar Todos';
+                btn.style.backgroundColor = '#dc3545';
+            }
+            
+            actualizarContador();
         }
+        
+        // Función para actualizar los asistentes seleccionados
         function actualizarAsistentesSeleccionados(email) {
             const checkbox = document.querySelector(`#asistentes-checkbox input[value="${email}"]`);
+            
             if (checkbox.checked) {
                 if (!asistentesSeleccionados.includes(email)) {
                     asistentesSeleccionados.push(email);
@@ -434,29 +651,73 @@
             } else {
                 asistentesSeleccionados = asistentesSeleccionados.filter(e => e !== email);
             }
+            
+            actualizarContador();
+            actualizarBotonSeleccionarTodos();
         }
+        
+        // Función para actualizar el contador de seleccionados
+        function actualizarContador() {
+            const counterElement = document.getElementById('counter-number');
+            if (counterElement) {
+                counterElement.textContent = asistentesSeleccionados.length;
+            }
+        }
+        
+        // Función para actualizar el texto del botón "Seleccionar Todos"
+        function actualizarBotonSeleccionarTodos() {
+            const checkboxes = document.querySelectorAll('#asistentes-checkbox input[type="checkbox"]');
+            const btn = document.getElementById('select-all-btn');
+            
+            if (checkboxes.length === 0) return;
+            
+            const todosSeleccionados = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            
+            if (todosSeleccionados) {
+                btn.textContent = 'Deseleccionar Todos';
+                btn.style.backgroundColor = '#dc3545';
+            } else {
+                btn.textContent = 'Seleccionar Todos';
+                btn.style.backgroundColor = '#17a2b8';
+            }
+        }
+        
         // Función para guardar los asistentes seleccionados
         function guardarAsistentesSeleccionados() {
-            // Aquí puedes guardar los asistentes seleccionados en tu evento
             console.log('Asistentes seleccionados:', asistentesSeleccionados);
-            // Cierra el modal después de guardar
             cerrarModalAsistentes();
-            // Actualiza la vista de asistentes seleccionados en el formulario principal (opcional)
             actualizarVistaAsistentesSeleccionados();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: `Se han seleccionado ${asistentesSeleccionados.length} socio(s)`,
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
+        
         // Función para actualizar la vista de asistentes seleccionados en el formulario principal
         function actualizarVistaAsistentesSeleccionados() {
             const container = document.getElementById('asistentes-seleccionados');
             container.innerHTML = '';
+            
+            if (asistentesSeleccionados.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No hay socios seleccionados</p>';
+                return;
+            }
+            
             asistentesSeleccionados.forEach(email => {
-                const asistente = JSON.parse(localStorage.getItem('asistentes')).find(a => a.email === email);
+                const asistente = todosLosAsistentes.find(a => a.email === email);
                 if (asistente) {
                     const span = document.createElement('span');
-                    span.textContent = asistente.nombre + '; ';
+                    span.style.cssText = 'display: inline-block; background-color: #e9ecef; padding: 5px 10px; margin: 2px; border-radius: 15px; font-size: 14px;';
+                    span.textContent = asistente.nombre;
                     container.appendChild(span);
                 }
             });
         }
+        
         // Function to load events from local storage
         function cargarEventos() {
             let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
@@ -482,19 +743,36 @@
                 listaEventos.appendChild(row);
             });
         }
+        
         // Function to save an event
         function guardarEvento() {
             const nombre = document.getElementById('evento-nombre').value;
             const fecha = document.getElementById('evento-fecha').value;
+            
             if (!nombre || !fecha) {
                 Swal.fire('Error', 'Por favor, complete todos los campos.', 'error');
                 return;
             }
+
+            // Validar que la fecha no sea pasada antes de guardar
+            if (!validarFecha()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Fecha inválida',
+                    text: 'No se pueden seleccionar fechas pasadas. Por favor, seleccione una fecha actual o futura.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+            
             if (asistentesSeleccionados.length === 0) {
                 Swal.fire('Error', 'Por favor, seleccione al menos un socio.', 'error');
                 return;
             }
+            
             let eventos = JSON.parse(localStorage.getItem('eventos')) || [];
+            
             if (eventoEnEdicion) {
                 // Editing existing event
                 eventoEnEdicion.nombre = nombre;
@@ -516,21 +794,30 @@
                 };
                 eventos.push(nuevoEvento);
             }
+            
             localStorage.setItem('eventos', JSON.stringify(eventos));
             cargarEventos(); // Reload events to update the list
             Swal.fire('Éxito', 'Evento guardado correctamente.', 'success');
             document.getElementById('evento-form').reset();
             asistentesSeleccionados = [];
-            document.getElementById('asistentes-seleccionados').innerHTML = '';
+            actualizarVistaAsistentesSeleccionados();
         }
+        
         // Function to cancel event creation/editing
         function cancelarEvento() {
             eventoEnEdicion = null; // Clear editing mode
             document.getElementById('evento-form').reset();
             asistentesSeleccionados = [];
-            document.getElementById('asistentes-seleccionados').innerHTML = '';
+            actualizarVistaAsistentesSeleccionados();
             document.getElementById('btn-submit').textContent = 'Crear Evento';
+            
+            // Limpiar validación de fecha
+            const fechaInput = document.getElementById('evento-fecha');
+            const errorMessage = document.getElementById('fecha-error');
+            fechaInput.classList.remove('fecha-error');
+            errorMessage.style.display = 'none';
         }
+        
         // Function to edit an event
         function editarEvento(id) {
             const eventos = JSON.parse(localStorage.getItem('eventos')) || [];
@@ -539,11 +826,17 @@
                 document.getElementById('evento-id').value = eventoEnEdicion.id;
                 document.getElementById('evento-nombre').value = eventoEnEdicion.nombre;
                 document.getElementById('evento-fecha').value = eventoEnEdicion.fecha;
-                asistentesSeleccionados = eventoEnEdicion.asistentes;
+                asistentesSeleccionados = [...eventoEnEdicion.asistentes]; // Crear una copia del array
                 actualizarVistaAsistentesSeleccionados();
                 document.getElementById('btn-submit').textContent = 'Actualizar Evento';
+                
+                // Validar la fecha al cargar para edición
+                setTimeout(() => {
+                    validarFecha();
+                }, 100);
             }
         }
+        
         // Function to delete an event
         function eliminarEvento(id) {
             Swal.fire({
